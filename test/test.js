@@ -86,6 +86,47 @@ describe('SteamConfig', function () {
     steam = undefined
   })
 
+  describe('#detectUser', function () {
+    it('should detect the user if possible', async function () {
+      await steam.load(steam.getPath('loginusers'))
+      await steam.load(steam.getPath('registry'))
+      steam.registry.should.be.a('object')
+      steam.loginusers.should.be.a('object')
+      let user = steam.detectUser()
+      user.should.equal('76561198067577712')
+    })
+
+    it('should throw an error if a user is not found', function () {
+      try {
+        let user = steam.detectUser()
+        user.should.not.exist()
+      } catch (err) {
+        if (err.message.indexOf('Could not detect user.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+  })
+
+  describe('#setUser', function () {
+    it('should detect and set the user if possible', async function () {
+      await steam.load(steam.getPath('loginusers'))
+      steam.setUser('l3l_aze')
+      steam.currentUser.should.equal('76561198067577712')
+    })
+
+    it('should throw an error if the user is not found', async function () {
+      try {
+        await steam.load(steam.getPath('loginusers'))
+        steam.setUser('Batman')
+      } catch (err) {
+        if (err.message.indexOf('is an invalid user identifier.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+  })
+
   describe('#getPath(name, id, extra)', function () {
     it('should throw an error for an invalid name argument', function () {
       try {

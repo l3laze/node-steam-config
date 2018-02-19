@@ -271,6 +271,42 @@ SteamConfig.prototype.load = async function load (entries) {
   }
 }
 
+SteamConfig.prototype.detectUser = function detectUser () {
+  let detected
+
+  if (this.registry && this.loginusers && this.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser !== '') {
+    console.info('Checking registry')
+
+    let tmp = this.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser
+    detected = Object.keys(this.loginusers.users).filter(k => this.loginusers.users[ k ].AccountName === tmp)[ 0 ] || undefined
+    if (detected) {
+      console.info('Detected at registry')
+    }
+  }
+
+  if (!detected && this.loginusers) {
+    let keys = Object.keys(this.loginusers.users)
+    if (keys.length === 1) {
+      detected = keys[ 0 ]
+    } else {
+      detected = keys.filter(k => this.loginusers.users[ k ].mostrecent === '1')[ 0 ] || undefined
+    }
+  }
+
+  if (detected) {
+    return detected
+  } else {
+    throw new Error('Could not detect user.')
+  }
+}
+
+SteamConfig.prototype.setUser = function setUser (toUser) {
+  this.currentUser = Object.keys(this.loginusers.users).filter(u => u === toUser || this.loginusers.users[ u ].accountId === toUser || this.loginusers.users[ u ].AccountName === toUser || this.loginusers.users[ u ].PersonaName === toUser)[ 0 ] || null
+  if (this.currentUser === null) {
+    throw new Error(`${toUser} is an invalid user identifier.`)
+  }
+}
+
 function beforeLoad (entries) {
   let first = []
   let last = []
@@ -295,6 +331,12 @@ function afterLoad (name, data) {
           delete data.LibraryFolders[ key ]
         }
       }
+      break
+
+    case 'loginusers':
+      Object.keys(data.users).forEach(k => {
+        data.users[ k ].id64 = k
+      })
       break
 
     default:
