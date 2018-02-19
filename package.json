@@ -1,0 +1,31 @@
+{
+  "name": "steamconfig",
+  "version": "0.0.2",
+  "main": "index.js",
+  "author": "Tom <l3l_aze@yahoo.com>",
+  "copyright": "Copyright © 2017 ${author}",
+  "description": "Library to help read/modify/write the Steam Client's configuration.",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "bytebuffer": "^5.0.1",
+    "cuint": "^0.2.2",
+    "fast-xml-parser": "^3.0.1",
+    "node-fetch": "^2.0.0",
+    "rage-edit": "^1.0.2",
+    "simple-vdf2": "^1.1.1"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "cli": "^1.0.1",
+    "mocha": "^5.0.0",
+    "standard": "^10.0.3",
+    "steam-dummy": "^0.0.1"
+  },
+  "scripts": {
+    "lint": "yarn standard",
+    "test": "mocha test",
+    "exlog": "node ./examples/log_info.js",
+    "exsu": "node ./examples/switch_user.js"
+  }
+}

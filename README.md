@@ -1,2 +1,1 @@
-# node-steam-config
-...
+node-steam-config
