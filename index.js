@@ -101,7 +101,7 @@ SteamConfig.prototype.getPath = function getPath (name, id, extra) {
     case 'app':
       entry.id = id
       entry.library = extra
-      entry.path = path.join(extra, 'steamapps', `appmanifest_${id}.acf`)
+      entry.path = path.join(extra, `appmanifest_${id}.acf`)
       break
 
     case 'appinfo':
@@ -170,7 +170,7 @@ SteamConfig.prototype.load = async function load (entries) {
     throw new Error(`${entries} is an invalid argument to load(). Should be an 'object', or an 'array' of 'object' entries.`)
   }
 
-  entries = beforeLoad(entries)
+  entries = prepareFilenames(entries)
 
   try {
     let data
@@ -179,6 +179,8 @@ SteamConfig.prototype.load = async function load (entries) {
       switch (entry.name) {
         case 'app':
           data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          data.library = entry.library
+          data.path = entry.path
           return data
 
         case 'appinfo':
@@ -212,7 +214,8 @@ SteamConfig.prototype.load = async function load (entries) {
         case 'steamapps':
           data = fs.readdirSync(entry.path).filter(f => f.indexOf('.acf') !== -1)
           data = await Promise.all(data.map(async (f) => {
-            f = await TVDF.parse('' + await fs.readFileAsync(path.join(entry.path, f)))
+            let appPath = this.getPath('app', path.basename(f).split('.')[0].split('_')[1], entry.path)
+            f = this.load(appPath)
             return f
           }))
           data = afterLoad(entry.name, data)
@@ -271,17 +274,104 @@ SteamConfig.prototype.load = async function load (entries) {
   }
 }
 
+SteamConfig.prototype.save = async function save (entries) {
+  if (typeof entries === 'object' && entries.constructor !== Array) {
+    entries = [entries]
+  }
+
+  if (typeof entries !== 'object' || entries.constructor !== Array) {
+    throw new Error(`${entries} is an invalid argument to save(). Should be an 'object', or an 'array' of 'object' entries.`)
+  }
+
+  entries = prepareFilenames(entries)
+
+  try {
+    let data
+    let tmp
+    let tmp2
+
+    for (let entry of entries) {
+      switch (entry.name) {
+        case 'app':
+          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          tmp = this.steamapps.filter((a, i) => {
+            tmp2 = i
+            return a.AppState.appid === entry.id
+          })[ 0 ]
+          if (!tmp) {
+            throw new Error(`${entry.path} is invalid; it could not be found.`)
+          }
+          tmp = Object.assign(data, tmp)
+          this.steamapps[ tmp2 ] = tmp
+          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          break
+
+        case 'config':
+          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          tmp = Object.assign(data, this.config)
+          this.config = tmp
+          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          break
+
+        case 'loginusers':
+          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          tmp = Object.assign(data, this.loginusers)
+          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          break
+
+        case 'registry':
+          if (platform === 'darwin') {
+            data = '' + await fs.readFileAsync(path.join(this.rootPath, 'registry.vdf'))
+            data = await TVDF.parse(data)
+          } else if (platform === 'linux') {
+            data = '' + await fs.readFileAsync(path.join(this.rootPath, '..', 'registry.vdf'))
+            data = await TVDF.parse(data)
+          } else if (platform === 'win32') {
+            const winreg = new Registry('HKCU\\Software\\Valve\\Steam')
+            data = { 'Registry': { 'HKCU': { 'Software': { 'Valve': { 'Steam': {
+              'language': await winreg.get('language'),
+              'RunningAppID': await winreg.get('RunningAppID'),
+              'Apps': await winreg.get('Apps'),
+              'AutoLoginUser': await winreg.get('AutoLoginUser'),
+              'RememberPassword': await winreg.get('RememberPassword'),
+              'SourceModInstallPath': await winreg.get('SourceModInstallPath'),
+              'AlreadyRetriedOfflineMode': await winreg.get('AlreadyRetriedOfflineMode'),
+              'StartupMode': await winreg.get('StartupMode'),
+              'SkinV4': await winreg.get('SkinV4')
+            }}}}}}
+          }
+          this.registry = data
+          break
+
+        case 'localconfig':
+          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          tmp = Object.assign(data, this.loginusers.users[ entry.id64 ].localconfig)
+          this.loginusers.users[ entry.id64 ].localconfig = tmp
+          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          break
+
+        case 'sharedconfig':
+          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          tmp = Object.assign(data, this.loginusers.users[ entry.id64 ].sharedconfig)
+          this.loginusers.users[ entry.id64 ].sharedconfig = tmp
+          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          break
+
+        default:
+          throw new Error(`Cannot load unknown entry '${entry.name}'.`)
+      }
+    }
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
 SteamConfig.prototype.detectUser = function detectUser () {
   let detected
 
   if (this.registry && this.loginusers && this.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser !== '') {
-    console.info('Checking registry')
-
     let tmp = this.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser
     detected = Object.keys(this.loginusers.users).filter(k => this.loginusers.users[ k ].AccountName === tmp)[ 0 ] || undefined
-    if (detected) {
-      console.info('Detected at registry')
-    }
   }
 
   if (!detected && this.loginusers) {
@@ -307,7 +397,34 @@ SteamConfig.prototype.setUser = function setUser (toUser) {
   }
 }
 
-function beforeLoad (entries) {
+SteamConfig.prototype.strip = function (name) {
+  let keys
+  let data
+
+  switch (name) {
+    case 'steamapps':
+      data = Object.assign(this.steamapps)
+      data.map(a => {
+        delete a.library
+        delete a.path
+      })
+      break
+
+    case 'loginusers':
+      data = Object.assign(this.loginusers)
+      keys = Object.keys(data)
+      keys.forEach(u => {
+        delete data[ u ].localconfig
+        delete data[ u ].sharedconfig
+        delete data[ u ].shortcuts
+      })
+      break
+  }
+
+  return data
+}
+
+function prepareFilenames (entries) {
   let first = []
   let last = []
 

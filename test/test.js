@@ -221,4 +221,70 @@ describe('SteamConfig', function () {
       steam.appinfo.should.be.a('array')
     })
   })
+
+  describe('#save(name)', function () {
+    it('should throw an error for an invalid argument', async function () {
+      try {
+        await steam.save('something')
+      } catch (err) {
+        if (err.message.indexOf('is an invalid argument to save(). Should be an \'object\', or an \'array\' of \'object\' entries.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should save config as requested', async function loadConfig () {
+      let original
+      let modified
+
+      await steam.load(steam.getPath('config'))
+      original = steam.config
+      await steam.save(steam.getPath('config'))
+      modified = steam.config
+      original.InstallConfigStore.should.equal(modified.InstallConfigStore)
+    })
+
+    it('should save loginusers as requested', async function loadLoginUsers () {
+      let original
+      let modified
+
+      await steam.load(steam.getPath('loginusers'))
+      original = steam.loginusers
+      await steam.save(steam.getPath('loginusers'))
+      modified = steam.loginusers
+      original.should.equal(modified)
+    })
+
+    it('should save localconfig as requested', async function loadLocalConfig () {
+      let original
+      let modified
+
+      await steam.load(steam.getPath('loginusers'))
+      await steam.load(steam.getPath('localconfig', steam.currentUser.id64, steam.currentUser.accountId))
+      original = JSON.stringify(Object.assign(steam.loginusers.users[ steam.currentUser.id64 ].localconfig))
+      await steam.save(steam.getPath('localconfig', steam.currentUser.id64, steam.currentUser.accountId))
+      modified = JSON.stringify(Object.assign(steam.loginusers.users[ steam.currentUser.id64 ].localconfig))
+      original.should.equal(modified)
+    })
+
+    it('should save sharedconfig as requested', async function loadSharedConfig () {
+      await steam.load(steam.getPath('loginusers'))
+      await steam.load(steam.getPath('sharedconfig', steam.currentUser.id64, steam.currentUser.accountId))
+      await steam.save(steam.getPath('sharedconfig', steam.currentUser.id64, steam.currentUser.accountId))
+    })
+
+    it('should save an app as requested', async function loadConfig () {
+      let original
+      let modified
+
+      await steam.load(steam.getPath('steamapps'))
+      let app = steam.steamapps[ 0 ]
+      let pathData = steam.getPath('app', app.AppState.appid, app.library)
+      original = steam.strip('steamapps')[ 0 ]
+      steam.steamapps[ 0 ].AppState.StateFlags = '512'
+      await steam.save(pathData)
+      modified = steam.strip('steamapps')[ 0 ]
+      original.should.equal(modified)
+    })
+  })
 })
