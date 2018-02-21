@@ -80,6 +80,8 @@ describe('SteamConfig', function () {
       id64: '76561198067577712',
       accountId: '107311984'
     }
+    steam.paths.id64 = steam.currentUser.id64
+    steam.paths.accountId = steam.currentUser.accountId
   })
 
   afterEach(function () {
@@ -88,8 +90,7 @@ describe('SteamConfig', function () {
 
   describe('#detectUser', function () {
     it('should detect the user if possible', async function () {
-      await steam.load(steam.getPath('loginusers'))
-      await steam.load(steam.getPath('registry'))
+      await steam.load([steam.paths.loginusers, steam.paths.registry])
       steam.registry.should.be.a('object')
       steam.loginusers.should.be.a('object')
       let user = steam.detectUser()
@@ -108,16 +109,16 @@ describe('SteamConfig', function () {
     })
   })
 
-  describe('#setUser', function () {
-    it('should detect and set the user if possible', async function () {
-      await steam.load(steam.getPath('loginusers'))
+  describe('#setUser(identifer)', function () {
+    it('should set the user if detected based on identifer', async function () {
+      await steam.load(steam.paths.loginusers)
       steam.setUser('l3l_aze')
       steam.currentUser.should.equal('76561198067577712')
     })
 
     it('should throw an error if the user is not found', async function () {
       try {
-        await steam.load(steam.getPath('loginusers'))
+        await steam.load(steam.paths.loginusers)
         steam.setUser('Batman')
       } catch (err) {
         if (err.message.indexOf('is an invalid user identifier.') === -1) {
@@ -127,97 +128,64 @@ describe('SteamConfig', function () {
     })
   })
 
-  describe('#getPath(name, id, extra)', function () {
-    it('should throw an error for an invalid name argument', function () {
-      try {
-        steam.getPath('somewhere')
-      } catch (err) {
-        if (err.message.indexOf('Cannot find path to invalid argument') === -1) {
-          throw new Error(err)
-        }
-      }
-    })
-
-    it('should return a "descriptive" object for each path', function () {
-      steam.getPath('appinfo').should.have.property('path')
-      steam.getPath('config').should.have.property('path')
-      steam.getPath('libraryfolders').should.have.property('path')
-      steam.getPath('localconfig', steam.currentUser.id64, steam.currentUser.accountId).should.have.property('path')
-      steam.getPath('loginusers').should.have.property('path')
-      steam.getPath('registry').should.have.property('path')
-      steam.getPath('sharedconfig', steam.currentUser.id64, steam.currentUser.accountId).should.have.property('path')
-      steam.getPath('shortcuts', steam.currentUser.id64, steam.currentUser.accountId).should.have.property('path')
-      steam.getPath('skins').should.have.property('path')
-      steam.getPath('steamapps').should.have.property('path')
-    })
-
-    it('should map the special entry "all" to all the other entries', function () {
-      let paths = steam.getPath('all', steam.currentUser.id64, steam.currentUser.accountId)
-      paths.should.be.a('array').with.length(10)
-    })
-  })
-
   describe('#load(name)', function () {
     it('should throw an error for an invalid argument', async function () {
       try {
         await steam.load('something')
       } catch (err) {
-        if (err.message.indexOf('is an invalid argument to load(). Should be an \'object\', or an \'array\' of \'object\' entries.') === -1) {
+        if (err.message.indexOf('Cannot load unknown entry type') === -1) {
           throw new Error(err)
         }
       }
     })
 
     it('should load config as requested', async function loadConfig () {
-      await steam.load(steam.getPath('config'))
+      await steam.load(steam.paths.config)
       steam.config.should.have.property('InstallConfigStore')
     })
 
     it('should load libraryfolders as requested', async function loadLibraryFolders () {
-      await steam.load(steam.getPath('libraryfolders'))
+      await steam.load(steam.paths.libraryfolders)
       steam.libraryfolders.should.have.property('LibraryFolders')
     })
 
     it('should load loginusers as requested', async function loadLoginUsers () {
-      await steam.load(steam.getPath('loginusers'))
+      await steam.load(steam.paths.loginusers)
       steam.loginusers.should.have.property('users')
     })
 
     it('should load skins as requested', async function loadSkins () {
-      await steam.load(steam.getPath('skins'))
+      await steam.load(steam.paths.skins)
       steam.skins.should.be.a('array')
     })
 
     it('should load a steamapps folder as requested', async function loadSteamApps () {
-      await steam.load(steam.getPath('steamapps'))
+      await steam.load(steam.paths.steamapps())
       steam.steamapps.should.be.a('array')
     })
 
     it('should load registry as requested', async function loadRegistry () {
-      await steam.load(steam.getPath('registry'))
+      await steam.load(steam.paths.registry)
       steam.registry.should.have.property('Registry')
     })
 
     it('should load shortcuts as requested', async function loadShortcuts () {
-      await steam.load(steam.getPath('loginusers'))
-      await steam.load(steam.getPath('shortcuts', steam.currentUser.id64, steam.currentUser.accountId))
-      steam.loginusers.users[ steam.currentUser.id64 ].shortcuts.should.have.property('shortcuts')
+      await steam.load([steam.paths.loginusers, steam.paths.shortcuts])
+      steam.loginusers.users[ steam.paths.id64 ].shortcuts.should.have.property('shortcuts')
     })
 
     it('should load localconfig as requested', async function loadLocalConfig () {
-      await steam.load(steam.getPath('loginusers'))
-      await steam.load(steam.getPath('localconfig', steam.currentUser.id64, steam.currentUser.accountId))
+      await steam.load([steam.paths.loginusers, steam.paths.localconfig])
       steam.loginusers.users[ steam.currentUser.id64 ].localconfig.should.have.property('UserLocalConfigStore')
     })
 
     it('should load sharedconfig as requested', async function loadSharedConfig () {
-      await steam.load(steam.getPath('loginusers'))
-      await steam.load(steam.getPath('sharedconfig', steam.currentUser.id64, steam.currentUser.accountId))
+      await steam.load([steam.paths.loginusers, steam.paths.sharedconfig])
       steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig.should.have.property('UserRoamingConfigStore')
     })
 
     it('should load appinfo..though slowly', async function loadAppinfo () {
-      await steam.load(steam.getPath('appinfo'))
+      await steam.load(steam.paths.appinfo)
       steam.appinfo.should.be.a('array')
     })
   })
@@ -227,7 +195,7 @@ describe('SteamConfig', function () {
       try {
         await steam.save('something')
       } catch (err) {
-        if (err.message.indexOf('is an invalid argument to save(). Should be an \'object\', or an \'array\' of \'object\' entries.') === -1) {
+        if (err.message.indexOf('Cannot save unknown entry') === -1) {
           throw new Error(err)
         }
       }
@@ -237,9 +205,9 @@ describe('SteamConfig', function () {
       let original
       let modified
 
-      await steam.load(steam.getPath('config'))
-      original = steam.config
-      await steam.save(steam.getPath('config'))
+      await steam.load(steam.paths.config)
+      original = Object.assign(steam.config)
+      await steam.save(steam.paths.config)
       modified = steam.config
       original.InstallConfigStore.should.equal(modified.InstallConfigStore)
     })
@@ -248,9 +216,9 @@ describe('SteamConfig', function () {
       let original
       let modified
 
-      await steam.load(steam.getPath('loginusers'))
-      original = steam.loginusers
-      await steam.save(steam.getPath('loginusers'))
+      await steam.load(steam.paths.loginusers)
+      original = Object.assign(steam.loginusers)
+      await steam.save(steam.paths.loginusers)
       modified = steam.loginusers
       original.should.equal(modified)
     })
@@ -259,30 +227,33 @@ describe('SteamConfig', function () {
       let original
       let modified
 
-      await steam.load(steam.getPath('loginusers'))
-      await steam.load(steam.getPath('localconfig', steam.currentUser.id64, steam.currentUser.accountId))
-      original = JSON.stringify(Object.assign(steam.loginusers.users[ steam.currentUser.id64 ].localconfig))
-      await steam.save(steam.getPath('localconfig', steam.currentUser.id64, steam.currentUser.accountId))
-      modified = JSON.stringify(Object.assign(steam.loginusers.users[ steam.currentUser.id64 ].localconfig))
+      await steam.load([steam.paths.loginusers, steam.paths.localconfig])
+      original = JSON.stringify(Object.assign(steam.loginusers.users[ steam.paths.id64 ].localconfig))
+      await steam.save(steam.paths.localconfig)
+      modified = JSON.stringify(Object.assign(steam.loginusers.users[ steam.paths.id64 ].localconfig))
       original.should.equal(modified)
     })
 
     it('should save sharedconfig as requested', async function loadSharedConfig () {
-      await steam.load(steam.getPath('loginusers'))
-      await steam.load(steam.getPath('sharedconfig', steam.currentUser.id64, steam.currentUser.accountId))
-      await steam.save(steam.getPath('sharedconfig', steam.currentUser.id64, steam.currentUser.accountId))
+      let original
+      let modified
+
+      await steam.load([steam.paths.loginusers, steam.paths.sharedconfig])
+      original = JSON.stringify(Object.assign(steam.loginusers.users[ steam.paths.id64 ].sharedconfig))
+      await steam.save(steam.paths.sharedconfig)
+      modified = JSON.stringify(Object.assign(steam.loginusers.users[ steam.paths.id64 ].sharedconfig))
+      original.should.equal(modified)
     })
 
     it('should save an app as requested', async function loadConfig () {
       let original
       let modified
 
-      await steam.load(steam.getPath('steamapps'))
+      await steam.load(steam.paths.steamapps())
       let app = steam.steamapps[ 0 ]
-      let pathData = steam.getPath('app', app.AppState.appid, app.library)
       original = steam.strip('steamapps')[ 0 ]
       steam.steamapps[ 0 ].AppState.StateFlags = '512'
-      await steam.save(pathData)
+      await steam.save(steam.paths.app(app.AppState.appid, app.library))
       modified = steam.strip('steamapps')[ 0 ]
       original.should.equal(modified)
     })

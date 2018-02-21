@@ -18,20 +18,12 @@ let options = cli.parse({
 let steam = new SteamConfig()
 
 async function run () {
-  let installPath = null
   if (options.path === null) {
     console.info('Trying to find default path to Steam...')
-    installPath = steam.detectPath()
-    if (installPath !== null) {
-      steam.setInstallPath(installPath)
-    } else {
-      process.error('Couldn\'t find default path to Steam.')
-      process.exit(1)
-    }
+    steam.detectRoot(true)
   }
 
-  await steam.loadRegistry()
-  await steam.loadLoginusers()
+  await steam.load(steam.paths.registry, steam.paths.loginusers)
 
   let userKeys = Object.keys(steam.loginusers.users)
 
@@ -57,4 +49,9 @@ async function run () {
   }
 }
 
-run()
+try {
+  run()
+} catch (err) {
+  console.error(err)
+  process.exit(1)
+}

@@ -1,8 +1,11 @@
+'use strict'
+
 const fs = require('bluebird').Promise.promisifyAll(require('fs'))
 const path = require('path')
 const TVDF = require('simple-vdf2')
 const BVDF = require('./bvdf.js')
 const {Registry} = require('rage-edit')
+const SteamPaths = require('./steam-paths.js')
 
 const home = require('os').homedir()
 const arch = require('os').arch()
@@ -13,6 +16,7 @@ function SteamConfig () {
   this.currentUser = undefined
   this.winreg = platform === 'win32' ? new Registry('HKCU\\Software\\Valve\\Steam') : null
   this.appendToApps = false
+  this.paths = new SteamPaths()
 
   this.appinfo = undefined
   this.config = undefined
@@ -74,151 +78,81 @@ SteamConfig.prototype.setRoot = function setRoot (toPath) {
     throw new Error(`${toPath} does not seem to be a valid Steam installation. If it's a new installation login to the client and try again.`)
   }
 
+  this.paths.rootPath = toPath
   this.rootPath = toPath
 }
 
-SteamConfig.prototype.getPath = function getPath (name, id, extra) {
-  let entry = {
-    name: name
-  }
-
-  switch (name) {
-    case 'all':
-      entry = [
-        this.getPath('appinfo'),
-        this.getPath('config'),
-        this.getPath('libraryfolders'),
-        this.getPath('localconfig', id, extra),
-        this.getPath('loginusers'),
-        this.getPath('registry'),
-        this.getPath('sharedconfig', id, extra),
-        this.getPath('shortcuts', id, extra),
-        this.getPath('skins'),
-        this.getPath('steamapps')
-      ]
-      break
-
-    case 'app':
-      entry.id = id
-      entry.library = extra
-      entry.path = path.join(extra, `appmanifest_${id}.acf`)
-      break
-
-    case 'appinfo':
-      entry.path = path.join(this.rootPath, 'appcache', 'appinfo.vdf')
-      break
-
-    case 'libraryfolders':
-      entry.path = path.join(this.rootPath, 'steamapps', 'libraryfolders.vdf')
-      break
-
-    case 'localconfig':
-    case 'shortcuts':
-      entry.id64 = id
-      entry.path = path.join(this.rootPath, 'userdata', extra, 'config', `${name}.vdf`)
-      break
-
-    case 'config':
-    case 'loginusers':
-      entry.path = path.join(this.rootPath, 'config', `${name}.vdf`)
-      break
-
-    case 'registry':
-      if (platform === 'win32') {
-        entry.path = 'winreg'
-      } else if (platform === 'darwin') {
-        entry.path = path.join(this.rootPath, 'registry.vdf')
-      } else if (platform === 'linux') {
-        entry.path = path.join(this.rootPath, '..', 'registry.vdf')
-      }
-      break
-
-    case 'sharedconfig':
-      entry.id64 = id
-      entry.path = path.join(this.rootPath, 'userdata', extra, '7', 'remote', 'sharedconfig.vdf')
-      break
-
-    case 'skins':
-      if (platform === 'win32' || platform === 'linux') {
-        entry.path = path.join(this.rootPath, 'skins')
-      } else if (platform === 'darwin') {
-        entry.path = path.join(this.rootPath, 'Steam.AppBundle', 'Steam', 'Contents', 'MacOS', 'skins')
-      }
-      break
-
-    case 'steamapps':
-      if (extra) {
-        entry.path = path.join(extra, 'steamapps')
-      } else {
-        entry.path = path.join(this.rootPath, 'steamapps')
-      }
-      break
-
-    default:
-      throw new Error(`Cannot find path to invalid argument ${name}.`)
-  }
-
-  return entry
-}
-
 SteamConfig.prototype.load = async function load (entries) {
-  if (typeof entries === 'object' && entries.constructor !== Array) {
+  if (typeof entries === 'string') {
     entries = [entries]
   }
 
   if (typeof entries !== 'object' || entries.constructor !== Array) {
-    throw new Error(`${entries} is an invalid argument to load(). Should be an 'object', or an 'array' of 'object' entries.`)
+    throw new Error(`${entries} is invalid for SteamConfig.load. Should be a string, or an array of strings.`)
   }
 
   entries = prepareFilenames(entries)
 
   try {
     let data
+    let tmp
 
     for (let entry of entries) {
-      switch (entry.name) {
+      tmp = (path.extname(entry) === '' ? entry.split(/\/|\\/) : path.basename(entry, path.extname(entry)))
+
+      if (typeof tmp === 'object') {
+        tmp = tmp[tmp.length - 1]
+      }
+
+      if (tmp.indexOf('appmanifest') !== -1) {
+        tmp = 'app'
+      }
+
+      switch (tmp) {
         case 'app':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          data.library = entry.library
-          data.path = entry.path
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          data.library = path.dirname(entry)
+          data.path = entry
           return data
 
         case 'appinfo':
-          data = await fs.readFileAsync(entry.path)
+          data = await fs.readFileAsync(entry)
           data = await BVDF.parseAppInfo(data)
-          this.appinfo = afterLoad(entry.name, data)
+          this.appinfo = afterLoad(tmp, data)
           break
 
         case 'localconfig':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          this.loginusers.users[ entry.id64 ].localconfig = afterLoad(entry.name, data)
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          this.loginusers.users[ this.paths.id64 ].localconfig = afterLoad(tmp, data)
           break
 
         case 'sharedconfig':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          this.loginusers.users[ entry.id64 ].sharedconfig = afterLoad(entry.name, data)
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          this.loginusers.users[ this.paths.id64 ].sharedconfig = afterLoad(tmp, data)
           break
 
         case 'shortcuts':
-          data = await BVDF.parseShortcuts(await fs.readFileAsync(entry.path))
-          this.loginusers.users[ entry.id64 ].shortcuts = afterLoad(entry.name, data)
+          data = await BVDF.parseShortcuts(await fs.readFileAsync(entry))
+          this.loginusers.users[ this.paths.id64 ].shortcuts = afterLoad(tmp, data)
           break
 
         case 'skins':
-          data = fs.readdirSync(entry.path).filter(f => {
+          data = fs.readdirSync(entry).filter(f => {
             return f.indexOf('.txt') === -1 && f.charAt(0) !== '.'
           })
-          this.skins = afterLoad(entry.name, data)
+          this.skins = afterLoad(tmp, data)
           break
 
         case 'steamapps':
-          data = fs.readdirSync(entry.path).filter(f => f.indexOf('.acf') !== -1)
+          data = fs.readdirSync(entry).filter(f => f.indexOf('.acf') !== -1)
           data = await Promise.all(data.map(async (f) => {
-            let appPath = this.getPath('app', path.basename(f).split('.')[0].split('_')[1], entry.path)
+            tmp = '' + path.basename(f, '.acf')
+            tmp = tmp.substring(tmp.indexOf('_') + 1)
+            let appPath = this.paths.app(tmp, entry)
             f = this.load(appPath)
             return f
           }))
-          data = afterLoad(entry.name, data)
+          data = afterLoad(tmp, data)
           if (this.appendToApps && this.steamapps) {
             this.steamapps.concat(data)
           } else {
@@ -227,26 +161,26 @@ SteamConfig.prototype.load = async function load (entries) {
           break
 
         case 'config':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          this.config = afterLoad(entry.name, data)
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          this.config = afterLoad(tmp, data)
           break
 
         case 'libraryfolders':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          this.libraryfolders = afterLoad(entry.name, data)
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          this.libraryfolders = afterLoad(tmp, data)
           break
 
         case 'loginusers':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          this.loginusers = afterLoad(entry.name, data)
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          this.loginusers = afterLoad(tmp, data)
           break
 
         case 'registry':
           if (platform === 'darwin') {
-            data = '' + await fs.readFileAsync(path.join(this.rootPath, 'registry.vdf'))
+            data = '' + await fs.readFileAsync(path.join(this.paths.rootPath, 'registry.vdf'))
             data = await TVDF.parse(data)
           } else if (platform === 'linux') {
-            data = '' + await fs.readFileAsync(path.join(this.rootPath, '..', 'registry.vdf'))
+            data = '' + await fs.readFileAsync(path.join(this.paths.rootPath, '..', 'registry.vdf'))
             data = await TVDF.parse(data)
           } else if (platform === 'win32') {
             const winreg = new Registry('HKCU\\Software\\Valve\\Steam')
@@ -266,7 +200,7 @@ SteamConfig.prototype.load = async function load (entries) {
           break
 
         default:
-          throw new Error(`Cannot load unknown entry '${entry.name}'.`)
+          throw new Error(`Cannot load unknown entry type ${tmp} from ${entry}.`)
       }
     }
   } catch (err) {
@@ -275,12 +209,12 @@ SteamConfig.prototype.load = async function load (entries) {
 }
 
 SteamConfig.prototype.save = async function save (entries) {
-  if (typeof entries === 'object' && entries.constructor !== Array) {
+  if (typeof entries === 'string') {
     entries = [entries]
   }
 
   if (typeof entries !== 'object' || entries.constructor !== Array) {
-    throw new Error(`${entries} is an invalid argument to save(). Should be an 'object', or an 'array' of 'object' entries.`)
+    throw new Error(`${entries} is invalid for SteamConfig.save. Should be a string, or an array of strings.`)
   }
 
   entries = prepareFilenames(entries)
@@ -291,32 +225,40 @@ SteamConfig.prototype.save = async function save (entries) {
     let tmp2
 
     for (let entry of entries) {
-      switch (entry.name) {
+      tmp = (path.extname(entry) === '' ? entry.split(/\/|\\/) : path.basename(entry, path.extname(entry)))
+
+      if (typeof tmp === 'object') {
+        tmp = tmp[tmp.length - 1]
+      }
+
+      if (tmp.indexOf('appmanifest') !== -1) {
+        tmp = 'app'
+      }
+
+      switch (tmp) {
         case 'app':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          tmp = this.steamapps.filter((a, i) => {
-            tmp2 = i
-            return a.AppState.appid === entry.id
-          })[ 0 ]
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          tmp2 = '' + entry.substring(entry.indexOf('_') + 1, entry.indexOf('.'))
+          tmp = this.steamapps.filter(a => a.AppState.appid === tmp2)[ 0 ]
           if (!tmp) {
-            throw new Error(`${entry.path} is invalid; it could not be found.`)
+            throw new Error(`${entry} is invalid because it could not be found.`)
           }
           tmp = Object.assign(data, tmp)
           this.steamapps[ tmp2 ] = tmp
-          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          await fs.writeFileAsync(entry, TVDF.stringify(tmp, true))
           break
 
         case 'config':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
           tmp = Object.assign(data, this.config)
           this.config = tmp
-          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          await fs.writeFileAsync(entry, TVDF.stringify(tmp, true))
           break
 
         case 'loginusers':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
           tmp = Object.assign(data, this.loginusers)
-          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          await fs.writeFileAsync(entry, TVDF.stringify(tmp, true))
           break
 
         case 'registry':
@@ -344,21 +286,21 @@ SteamConfig.prototype.save = async function save (entries) {
           break
 
         case 'localconfig':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          tmp = Object.assign(data, this.loginusers.users[ entry.id64 ].localconfig)
-          this.loginusers.users[ entry.id64 ].localconfig = tmp
-          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          tmp = Object.assign(data, this.loginusers.users[ this.paths.id64 ].localconfig)
+          this.loginusers.users[ this.paths.id64 ].localconfig = tmp
+          await fs.writeFileAsync(entry, TVDF.stringify(tmp, true))
           break
 
         case 'sharedconfig':
-          data = await TVDF.parse('' + await fs.readFileAsync(entry.path))
-          tmp = Object.assign(data, this.loginusers.users[ entry.id64 ].sharedconfig)
-          this.loginusers.users[ entry.id64 ].sharedconfig = tmp
-          await fs.writeFileAsync(entry.path, TVDF.stringify(tmp, true))
+          data = await TVDF.parse('' + await fs.readFileAsync(entry))
+          tmp = Object.assign(data, this.loginusers.users[ this.paths.id64 ].sharedconfig)
+          this.loginusers.users[ this.paths.id64 ].sharedconfig = tmp
+          await fs.writeFileAsync(entry, TVDF.stringify(tmp, true))
           break
 
         default:
-          throw new Error(`Cannot load unknown entry '${entry.name}'.`)
+          throw new Error(`Cannot save unknown entry '${entry}'.`)
       }
     }
   } catch (err) {
@@ -429,7 +371,7 @@ function prepareFilenames (entries) {
   let last = []
 
   for (let entry of entries) {
-    if (entry.name === 'sharedconfig' || entry.name === 'localconfig' || entry.name === 'shortcuts') {
+    if (entry === 'sharedconfig' || entry === 'localconfig' || entry === 'shortcuts') {
       last.push(entry)
     } else {
       first.push(entry)
@@ -443,9 +385,9 @@ function afterLoad (name, data) {
   switch (name) {
     case 'libraryfolders':
       let keys = Object.keys(data.LibraryFolders)
-      for (let key of keys) {
-        if (key === 'TimeNextStatsReport' || key === 'ContentStatsID') {
-          delete data.LibraryFolders[ key ]
+      for (let keyName of keys) {
+        if (keyName === 'TimeNextStatsReport' || keyName === 'ContentStatsID') {
+          delete data.LibraryFolders[ keyName ]
         }
       }
       break
