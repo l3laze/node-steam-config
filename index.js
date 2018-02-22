@@ -2,7 +2,7 @@
 
 const fs = require('bluebird').Promise.promisifyAll(require('fs'))
 const path = require('path')
-const TVDF = require('simple-vdf2')
+const TVDF = require('./simple-vdf2.js')
 const BVDF = require('./bvdf.js')
 const {Registry} = require('rage-edit')
 const SteamPaths = require('./steam-paths.js')
