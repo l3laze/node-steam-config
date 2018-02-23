@@ -367,18 +367,21 @@ SteamConfig.prototype.strip = function (name) {
 }
 
 function prepareFilenames (entries) {
+  let important = []
   let first = []
   let last = []
 
   for (let entry of entries) {
-    if (entry === 'sharedconfig' || entry === 'localconfig' || entry === 'shortcuts') {
+    if (entry.indexOf('sharedconfig') !== -1 || entry.indexOf('localconfig') !== -1 || entry.indexOf('shortcuts') !== -1) {
       last.push(entry)
+    } else if (entry.indexOf('loginusers') !== -1 || entry.indexOf('registry') !== -1) {
+      important.push(entry)
     } else {
       first.push(entry)
     }
   }
 
-  return first.concat(last)
+  return important.concat(first.concat(last))
 }
 
 function afterLoad (name, data) {

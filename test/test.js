@@ -139,6 +139,18 @@ describe('SteamConfig', function () {
       }
     })
 
+    it('should load everything..though slowly', async function loadEverything () {
+      await steam.load(steam.paths.all)
+      steam.appinfo.should.be.a('array')
+      steam.config.should.be.a('object')
+      steam.loginusers.should.be.a('object')
+      steam.registry.should.be.a('object')
+      steam.loginusers.users[ steam.paths.id64 ].should.have.property('localconfig')
+      steam.loginusers.users[ steam.paths.id64 ].sharedconfig.should.be.a('object')
+      steam.loginusers.users[ steam.paths.id64 ].shortcuts.shortcuts.should.be.a('array')
+      steam.loginusers.users[ steam.paths.id64 ].localconfig.should.be.a('object')
+    })
+
     it('should load config as requested', async function loadConfig () {
       await steam.load(steam.paths.config)
       steam.config.should.have.property('InstallConfigStore')
