@@ -11,19 +11,22 @@ const home = require('os').homedir()
 const arch = require('os').arch()
 const platform = require('os').platform()
 
+const getAccountId = require('./steamdata-utils.js').getAccountIdFromId64
+
 function SteamConfig () {
   this.rootPath = null
-  this.currentUser = undefined
+  this.currentUser = null
   this.winreg = platform === 'win32' ? new Registry('HKCU\\Software\\Valve\\Steam') : null
   this.appendToApps = false
   this.paths = new SteamPaths()
 
-  this.appinfo = undefined
-  this.config = undefined
-  this.loginusers = undefined
-  this.registry = undefined
-  this.skins = undefined
-  this.steamapps = undefined
+  this.appinfo = null
+  this.config = null
+  this.libraryfolders = null
+  this.loginusers = null
+  this.registry = null
+  this.skins = null
+  this.steamapps = null
 }
 
 SteamConfig.prototype.detectRoot = function detectRoot (autoSet = false) {
@@ -150,6 +153,7 @@ SteamConfig.prototype.load = async function load (entries) {
             tmp = tmp.substring(tmp.indexOf('_') + 1)
             let appPath = this.paths.app(tmp, entry)
             f = this.load(appPath)
+            f = await this.load(appPath)
             return f
           }))
           data = afterLoad(tmp, data)
@@ -308,24 +312,22 @@ SteamConfig.prototype.save = async function save (entries) {
   }
 }
 
-SteamConfig.prototype.detectUser = function detectUser () {
+SteamConfig.prototype.detectUser = function detectUser (autoSet = false) {
   let detected
 
-  if (this.registry && this.loginusers && this.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser !== '') {
-    let tmp = this.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser
-    detected = Object.keys(this.loginusers.users).filter(k => this.loginusers.users[ k ].AccountName === tmp)[ 0 ] || undefined
-  }
-
-  if (!detected && this.loginusers) {
+  if (this.loginusers) {
     let keys = Object.keys(this.loginusers.users)
+
     if (keys.length === 1) {
       detected = keys[ 0 ]
     } else {
-      detected = keys.filter(k => this.loginusers.users[ k ].mostrecent === '1')[ 0 ] || undefined
+      detected = keys.filter(k => this.loginusers.users[ k ].mostrecent === '1')[ 0 ] || null
     }
   }
 
-  if (detected) {
+  if (detected && autoSet) {
+    this.setUser(detected)
+  } else if (detected) {
     return detected
   } else {
     throw new Error('Could not detect user.')
@@ -333,10 +335,26 @@ SteamConfig.prototype.detectUser = function detectUser () {
 }
 
 SteamConfig.prototype.setUser = function setUser (toUser) {
-  this.currentUser = Object.keys(this.loginusers.users).filter(u => u === toUser || this.loginusers.users[ u ].accountId === toUser || this.loginusers.users[ u ].AccountName === toUser || this.loginusers.users[ u ].PersonaName === toUser)[ 0 ] || null
-  if (this.currentUser === null) {
+  let tmp
+
+  Object.keys(this.loginusers.users).forEach(key => {
+    if (key === toUser || this.loginusers.users.accountId === toUser || this.loginusers.users[ key ].AccountName === toUser || this.loginusers.users[ key ].PersonaName === toUser) {
+      tmp = this.loginusers.users[ key ]
+    }
+  })
+
+  if (!tmp) {
     throw new Error(`${toUser} is an invalid user identifier.`)
   }
+
+  this.currentUser = Object.assign(tmp)
+
+  delete this.currentUser.localconfig
+  delete this.currentUser.sharedconfig
+  delete this.currentUser.shortcuts
+
+  this.paths.id64 = this.currentUser.id64
+  this.paths.accountId = this.currentUser.accountId
 }
 
 SteamConfig.prototype.strip = function (name) {
@@ -398,6 +416,7 @@ function afterLoad (name, data) {
     case 'loginusers':
       Object.keys(data.users).forEach(k => {
         data.users[ k ].id64 = k
+        data.users[ k ].accountId = getAccountId(k)
       })
       break
 

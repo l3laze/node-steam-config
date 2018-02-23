@@ -3,21 +3,32 @@ const SteamConfig = require('../index.js')
 let steam = new SteamConfig();
 
 (async function run () {
-  steam.detectRoot(true)
-  steam.currentUser = {
-    accountId: '107311984',
-    id64: '76561198067577712'
-  }
-  await steam.load(steam.getPath('all', steam.currentUser.id64, steam.currentUser.accountId))
+  try {
+    steam.detectRoot(true)
+    await steam.load(steam.paths.loginusers)
+    steam.detectUser(true)
+    await steam.load(steam.paths.all.concat([ steam.paths.steamapps() ]))
 
-  console.info('appinfo', typeof steam.appinfo)
-  console.info('config:', typeof steam.config)
-  console.info('libraryfolders', typeof steam.libraryfolders)
-  console.info('registry:', typeof steam.registry)
-  console.info('skins:', typeof steam.skins)
-  console.info('steamapps:', typeof steam.steamapps)
-  console.info('loginusers:', typeof steam.loginusers)
-  console.info('currentUser - localconfig:', typeof steam.loginusers.users[ steam.currentUser.id64 ].localconfig)
-  console.info('currentUser - sharedconfig:', typeof steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig)
-  console.info('currentUser - shortcuts:', typeof steam.loginusers.users[ steam.currentUser.id64 ].shortcuts)
+    steam.appendToApps = true
+    let tmp = Object.values(steam.libraryfolders.LibraryFolders);
+
+    for (let f of tmp) {
+      await steam.load(steam.paths.steamapps(f))
+    }
+
+    console.info('User:', steam.currentUser.PersonaName)
+    console.info('appinfo:', steam.appinfo.length)
+    console.info('config:', steam.config ? 'exists' : 'nope')
+    console.info('libraryfolders:', Object.keys(steam.libraryfolders).length + 1, '(one is the default /steamapps folder)')
+    console.info('registry:', steam.registry ? 'exists': 'nope')
+    console.info('skins:', steam.skins.length)
+    console.info('steamapps:', steam.steamapps.length)
+    console.info('loginusers:', Object.keys(steam.loginusers).length)
+    console.info('currentUser - localconfig:', steam.loginusers.users[ steam.currentUser.id64 ].localconfig ? 'exists' : 'nope')
+    console.info('currentUser - sharedconfig:', steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig ? 'exists' : 'nope')
+    console.info('currentUser - shortcuts:', steam.loginusers.users[ steam.currentUser.id64 ].shortcuts ? 'exists' : 'nope')
+  } catch (err) {
+    console.error(err)
+    process.exit(1)
+  }
 })()
