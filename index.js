@@ -152,13 +152,12 @@ SteamConfig.prototype.load = async function load (entries) {
             tmp = '' + path.basename(f, '.acf')
             tmp = tmp.substring(tmp.indexOf('_') + 1)
             let appPath = this.paths.app(tmp, entry)
-            f = this.load(appPath)
             f = await this.load(appPath)
             return f
           }))
           data = afterLoad(tmp, data)
           if (this.appendToApps && this.steamapps) {
-            this.steamapps.concat(data)
+            this.steamapps = this.steamapps.concat(data)
           } else {
             this.steamapps = data
           }
@@ -267,13 +266,16 @@ SteamConfig.prototype.save = async function save (entries) {
 
         case 'registry':
           if (platform === 'darwin') {
-            data = '' + await fs.readFileAsync(path.join(this.rootPath, 'registry.vdf'))
+            tmp = path.join(this.rootPath, 'registry.vdf')
+            data = '' + await fs.readFileAsync(tmp)
             data = await TVDF.parse(data)
           } else if (platform === 'linux') {
-            data = '' + await fs.readFileAsync(path.join(this.rootPath, '..', 'registry.vdf'))
+            tmp = path.join(this.rootPath, '..', 'registry.vdf')
+            data = '' + await fs.readFileAsync(tmp)
             data = await TVDF.parse(data)
           } else if (platform === 'win32') {
             const winreg = new Registry('HKCU\\Software\\Valve\\Steam')
+            tmp = 'winreg'
             data = { 'Registry': { 'HKCU': { 'Software': { 'Valve': { 'Steam': {
               'language': await winreg.get('language'),
               'RunningAppID': await winreg.get('RunningAppID'),
@@ -286,7 +288,20 @@ SteamConfig.prototype.save = async function save (entries) {
               'SkinV4': await winreg.get('SkinV4')
             }}}}}}
           }
-          this.registry = data
+          this.registry = Object.assign(data, this.registry)
+          if (tmp !== 'winreg') {
+            await fs.writeFileSync(tmp, TVDF.stringify(this.registry, true))
+          } else {
+            await winreg.set('language')
+            await winreg.set('RunningAppID')
+            await winreg.set('Apps')
+            await winreg.get('AutoLoginUser')
+            await winreg.get('RememberPassword')
+            await winreg.get('SourceModInstallPath')
+            await winreg.get('AlreadyRetriedOfflineMode')
+            await winreg.get('StartupMode')
+            await winreg.get('SkinV4')
+          }
           break
 
         case 'localconfig':

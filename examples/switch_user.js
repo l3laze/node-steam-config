@@ -23,12 +23,12 @@ async function run () {
     steam.detectRoot(true)
   }
 
-  await steam.load(steam.paths.registry, steam.paths.loginusers)
+  await steam.load([steam.paths.registry, steam.paths.loginusers])
 
   let userKeys = Object.keys(steam.loginusers.users)
 
   if (options.user === null && userKeys.length > 2) {
-    console.error(`There are ${userKeys.length} users associated with this Steam installation; can't auto-switch.`)
+    console.error(`There are ${userKeys.length} users associated with this Steam installation; cannott auto-switch between more than 2.`)
     process.exit(1)
   }
 
@@ -36,13 +36,13 @@ async function run () {
     if (options.user !== null) {
       if (steam.loginusers.users[userKeys[ i ]].AccountName === options.user || steam.loginusers.users[userKeys[ i ]].PersonaName === options.user) {
         steam.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser = steam.loginusers.users[userKeys[ i ]].AccountName
-        await steam.saveRegistry()
+        await steam.save(steam.paths.registry)
         console.info(`Switched to ${steam.loginusers.users[userKeys[ i ]].PersonaName}.`)
         process.exit(0)
       }
     } else if (steam.loginusers.users[userKeys[ i ]].AccountName !== steam.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser) {
       steam.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser = steam.loginusers.users[userKeys[ i ]].AccountName
-      await steam.saveRegistry()
+      await steam.save(steam.paths.registry)
       console.info(`Switched to ${steam.loginusers.users[userKeys[ i ]].PersonaName}.`)
       process.exit(0)
     }

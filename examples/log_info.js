@@ -19,7 +19,7 @@ let steam = new SteamConfig();
     console.info('User:', steam.currentUser.PersonaName)
     console.info('appinfo:', steam.appinfo.length)
     console.info('config:', steam.config ? 'exists' : 'nope')
-    console.info('libraryfolders:', Object.keys(steam.libraryfolders).length + 1, '(one is the default /steamapps folder)')
+    console.info('libraryfolders:', Object.keys(steam.libraryfolders).length)
     console.info('registry:', steam.registry ? 'exists': 'nope')
     console.info('skins:', steam.skins.length)
     console.info('steamapps:', steam.steamapps.length)

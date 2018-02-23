@@ -7,8 +7,10 @@ const BB = require('bluebird')
 const fs = BB.promisifyAll(require('fs'))
 const path = require('path')
 const cli = require('cli')
-const WebRequest = require('web-request')
-const fxp = require('fast-xml-parser')
+
+const requestOwnedApps = require('../steamdata-utils.js').requestOwnedApps
+const requestTags = require('../steamdata-utils.js').requestTags
+const requestGenres = require('../steamata-utils.js').requestGenres
 
 /*
  * Slightly increased console width for 'cli' because
@@ -38,29 +40,22 @@ async function run () {
   let gamesList = null
 
   if (options.path === null) {
-    let installPath = steam.detectPath()
+    steam.detectRoot(true)
     console.info('Trying to find default path to Steam...')
 
-    if (installPath !== null) {
-      console.info(`Found at ${installPath}`)
-      steam.setInstallPath(installPath)
-    } else {
+    if (!steam.paths.rootPath) {
       process.error('Couldn\'t find default path to Steam.')
       process.exit(1)
     }
   }
 
-  await steam.loadRegistry()
-  await steam.loadLoginusers()
-  await steam.setUser(await steam.detectUser())
-  await steam.loadSharedconfig()
-  await steam.loadAppinfo()
+  await steam.load([steam.paths.registry, steam.paths.loginusers])
 
   let userKeys = Object.keys(steam.loginusers.users)
 
   if (options.user === null) {
     try {
-      options.user = await steam.detectUser()
+      options.user = steam.detectUser(true)
     } catch (err) {
       if (err.message.indexOf('cannot auto-detect') !== -1 || err.message.indexOf('no users') !== -1) {
         console.error(err.message)
@@ -86,31 +81,15 @@ async function run () {
   }
 
   try {
-    if (fs.existsSync(path.join(__dirname, 'data', `${user.accountID}-games.json`))) {
-      console.info('Loading game list from cache...')
-      gamesList = JSON.parse('' + await fs.readFileAsync(path.join(__dirname, 'data', `${user.accountID}-games.json`)))
-    } else {
-      console.info('Loading game list from internet...')
-      let result = await WebRequest.get(`https://steamcommunity.com/profiles/${user.id64}/games/?tab=all&xml=1`)
-      if (result.content.indexOf('The specified profile could not be found.') !== -1) {
-        console.error('User not found...')
-        process.exit(1)
-      }
-      gamesList = fxp.parse(result.content).gamesList.games.game
-      if (!fs.existsSync(path.join(__dirname, 'data'))) {
-        fs.mkdirSync(path.join(__dirname, 'data'))
-      }
-      await fs.writeFileAsync(path.join(__dirname, 'data', `${user.accountID}-games.json`), JSON.stringify(gamesList, null, 2))
-    }
+    requestTags(false, {
+      enabled: true,
+      folder: path.join(__dirname, 'data')
+    })
 
-    if (fs.existsSync(path.join(__dirname, 'data', 'tags.json'))) {
-      console.info('Loading tag list from cache...')
-      tagList = JSON.parse('' + await fs.readFileAsync(path.join(__dirname, 'data', 'tags.json')))
-    } else {
-      console.info('Loading tag list from internet...')
-      let result = await WebRequest.get('http://store.steampowered.com/tagdata/populartags/english')
-      await fs.writeFileAsync(path.join(__dirname, 'data', 'tags.json'), JSON.parse(result.message.body))
-    }
+    requestGames(false, {
+      enabled: true,
+      folder: path.join(__dirnamae, 'data')
+    })
   } catch (err) {
     console.error(err)
     process.exit(1)

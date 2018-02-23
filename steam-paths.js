@@ -198,7 +198,7 @@ function SteamPaths () {
       library = path.join(library, 'steamapps')
 
       if (!fs.existsSync(library)) {
-        throw new Error(`Default steamapps folder does not exist.`)
+        throw new Error(`'${library}/steamapps' folder does not exist.`)
       }
 
       return library
