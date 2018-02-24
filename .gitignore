@@ -6,3 +6,5 @@ test/Dummy/
 test/\.DS_Store
 
 \.DS_Store
+
+examples/data/

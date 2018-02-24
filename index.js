@@ -17,8 +17,10 @@ function SteamConfig () {
   this.rootPath = null
   this.currentUser = null
   this.winreg = platform === 'win32' ? new Registry('HKCU\\Software\\Valve\\Steam') : null
-  this.appendToApps = false
   this.paths = new SteamPaths()
+
+  this.appendToApps = false
+  this.tags
 
   this.appinfo = null
   this.config = null

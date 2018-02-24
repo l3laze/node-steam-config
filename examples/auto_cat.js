@@ -10,7 +10,7 @@ const cli = require('cli')
 
 const requestOwnedApps = require('../steamdata-utils.js').requestOwnedApps
 const requestTags = require('../steamdata-utils.js').requestTags
-const requestGenres = require('../steamata-utils.js').requestGenres
+const requestGenres = require('../steamdata-utils.js').requestGenres
 
 /*
  * Slightly increased console width for 'cli' because
@@ -33,8 +33,6 @@ let options = cli.parse({
 
 let steam = new SteamConfig()
 
-let tagList
-
 async function run () {
   let user = {}
   let gamesList = null
@@ -49,7 +47,7 @@ async function run () {
     }
   }
 
-  await steam.load([steam.paths.registry, steam.paths.loginusers])
+  await steam.load([steam.paths.registry, steam.paths.loginusers, steam.paths.appinfo])
 
   let userKeys = Object.keys(steam.loginusers.users)
 
@@ -81,52 +79,49 @@ async function run () {
   }
 
   try {
-    requestTags(false, {
+    await steam.load(steam.paths.sharedconfig)
+    steam.tags = await requestTags(false, {
       enabled: true,
       folder: path.join(__dirname, 'data')
     })
 
-    requestGames(false, {
+    steam.loginusers.users[ steam.paths.id64 ].owned = await requestOwnedApps(steam.paths.id64, false, {
       enabled: true,
-      folder: path.join(__dirnamae, 'data')
+      folder: path.join(__dirname, 'data')
     })
   } catch (err) {
     console.error(err)
     process.exit(1)
   }
 
-  console.info(`${gamesList.length} games`)
-  console.info(`${tagList.length} tags`)
+  gamesList = steam.loginusers.users[ steam.paths.id64 ].owned
 
-  let hasOption = false
+  console.info(`${gamesList.length} games`)
+  console.info(`${steam.tags.length} tags`)
+
   let mode = (options.remove === false ? 'Adding' : 'Removing')
 
   if (options.pub) {
-    hasOption = true
     console.info(`${mode} publisher as category...`)
   }
 
   if (options.dev) {
-    hasOption = true
     console.info(`${mode} developer as category...`)
   }
 
   if (options.meta) {
-    hasOption = true
     console.info(`${mode} metacritic score as category...`)
   }
 
   if (options.noMeta) {
-    hasOption = true
     console.info(`${mode} "No Metacritic" as category...`)
   }
 
   if (options.tags) {
-    hasOption = true
     console.info(`${mode} ${options.numTags} most popular tags as categories...`)
   }
 
-  if (hasOption === false) {
+  if (!options.pub && !options.dev && !options.meta && !options.meta && !options.noMeta && !options.tags) {
     console.info('You didn\'t specify any options...nothing to do!')
     process.exit(0)
   }
@@ -136,12 +131,12 @@ async function run () {
       let app
       let info = getAppInfo(gamesList[ i ].appID)
 
-      if (steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps.hasOwnProperty(gamesList[ i ].appID) === false) {
+      if (steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps.hasOwnProperty(gamesList[ i ].appID) === false) {
         app = {
           'tags': {}
         }
       } else {
-        app = Object.assign({}, steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ gamesList[ i ].appID ])
+        app = Object.assign({}, steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ gamesList[ i ].appID ])
       }
 
       if (options.pub && !options.remove && info.entries.hasOwnProperty('extended') && info.entries.extended.hasOwnProperty('publisher')) {
@@ -184,24 +179,24 @@ async function run () {
         }
       }
 
-      if (JSON.stringify(app.tags) !== '{}' && steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps.hasOwnProperty(gamesList[ i ].appID) === false) {
-        steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[gamesList[ i ].appID] = app
+      if (JSON.stringify(app.tags) !== '{}' && steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps.hasOwnProperty(gamesList[ i ].appID) === false) {
+        steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[gamesList[ i ].appID] = app
       } else {
         if (JSON.stringify(app.tags) === '{}') {
-          delete steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[gamesList[ i ].appID]
+          delete steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[gamesList[ i ].appID]
         } else {
-          steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[gamesList[ i ].appID].tags = app.tags
+          steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ gamesList[ i ].appID ].tags = app.tags
         }
       }
     }
 
-    if (steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps) {
-      console.info(`${Object.keys(steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps).length} items categorized.`)
+    if (steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps) {
+      console.info(`${Object.keys(steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps).length} items categorized.`)
     } else {
       console.info(`No 'Apps' data.`)
     }
 
-    steam.saveTextVDF(steam.getPathTo('sharedconfig'), steam.sharedconfig)
+    steam.save(steam.paths.sharedconfig)
   } catch (err) {
     console.error(err)
     process.exit(1)
@@ -219,9 +214,9 @@ function getAppInfo (appid) {
 }
 
 function getTagById (id) {
-  for (let i = 0; i < tagList.length; i += 1) {
-    if (tagList[ i ].tagid === id) {
-      return tagList[ i ].name
+  for (let i = 0; i < steam.tags.length; i += 1) {
+    if (steam.tags[ i ].tagid === id) {
+      return steam.tags[ i ].name
     }
   }
 
@@ -229,8 +224,14 @@ function getTagById (id) {
 }
 
 function addCat (app, cat) {
-  let cats = Object.values(app.tags)
-  let index = cats.length || 0
+  let cats
+  let index
+
+  if(!app.tags) {
+    app.tags = {}
+  }
+  cats = Object.values(app.tags)
+  index = cats.length || 0
 
   if (cats.includes(cat) === false) {
     app.tags[ index ] = cat
@@ -241,10 +242,16 @@ function addCat (app, cat) {
 
 function removeCat (app, cat) {
   let newTags = 0
-  let keys = Object.keys(app.tags)
+  let keys
   let removed = {
     'tags': {}
   }
+
+  if (!app.tags) {
+    app.tags = {}
+  }
+
+  keys = Object.keys(app.tags)
 
   for (let i = 0; i < keys.length; i += 1) {
     if (app.tags[keys[ i ]].trim() !== cat) {
@@ -256,4 +263,9 @@ function removeCat (app, cat) {
   return removed
 }
 
-run()
+try {
+  run()
+} catch (err) {
+  console.error(err)
+  process.exit(1)
+}
