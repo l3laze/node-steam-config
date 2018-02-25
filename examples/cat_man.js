@@ -37,12 +37,13 @@ async function backupCats () {
   let hidden = 0
   let fav = 0
 
-  await steam.loadSharedconfig()
-  Object.assign(apps, steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps)
+  await steam.load(steam.paths.sharedconfig)
+  Object.assign(apps, steam.loginusers.users[ steam.paths.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps)
   Object.assign(appKeys, Object.keys(apps))
 
   Object.keys(apps).forEach(function (app) {
     let props = Object.getOwnPropertyNames(apps[ app ])
+
     props.forEach(function (prop) {
       if (prop !== 'tags' && prop !== 'Hidden') {
         delete apps[ app ][ prop ]
@@ -67,52 +68,57 @@ async function backupCats () {
   console.info(`Hidden:\t\t${hidden}`)
   console.info(`Categorized:\t${catted}`)
   console.info(`Favorites:\t${fav}`)
-  console.info(`Categories:\t${tags.length}\t${tags.join(', ')}`)
+  console.info(`Categories:\t${tags.length}`)
 
-  await fs.writeFileSync(path.join(__dirname, 'data', 'catbackup.json'), JSON.stringify(cats, null, 2))
+  await fs.writeFileSync(path.join(__dirname, 'data', `catbackup-${steam.currentUser.id64}.json`), JSON.stringify(cats, null, 2))
 }
 
 async function restoreCats () {
-  let backCats = JSON.parse('' + fs.readFileSync(path.join(__dirname, 'data', 'catbackup.json')))
-  await steam.loadSharedconfig()
-  let scApps = Object.keys(steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps)
+  let backupFile = path.join(__dirname, 'data', `catbackup-${steam.currentUser.id64}.json`)
+  let backCats
+  let scApps
   let original = {}
   let modified = {}
 
-  Object.assign(original, steam.sharedconfig)
+  if (!fs.existsSync(backupFile)) {
+    throw new Error(`There is no backup to restore from for ${steam.currentUser.id64}.`)
+  }
+
+  await steam.load(steam.paths.sharedconfig)
+
+  backCats = JSON.parse('' + fs.readFileSync(backupFile))
+  scApps = Object.keys(steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps)
+
+  Object.assign(original, steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig)
 
   Object.keys(backCats).forEach(function (appid) {
     if (scApps.includes(appid) === false) {
-      steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ appid ] = {}
+      steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ appid ] = {}
     }
 
     if (backCats[ appid ].tags) {
-      steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ appid ].tags = backCats[ appid ].tags
+      steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ appid ].tags = backCats[ appid ].tags
     }
 
     if (backCats[ appid ].Hidden) {
-      steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ appid ].Hidden = backCats[ appid ].Hidden
+      steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps[ appid ].Hidden = backCats[ appid ].Hidden
     }
   })
 
-  Object.assign(modified, steam.sharedconfig)
+  Object.assign(modified, steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig)
 
-  if (JSON.stringify(original) === JSON.stringify(modified)) {
-    console.debug('Restored version is okay')
-  }
+  console.info(`${Object.keys(steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps).length} items categorized.`)
 
-  await steam.saveTextVDF(path.join(steam.loc, 'userdata', steam.user.accountID, '7', 'remote', 'sharedconfig.vdf'), steam.sharedconfig)
+  await steam.save(steam.paths.sharedconfig)
 }
 
 async function run () {
-  let installPath = null
-
   try {
     if (!options.path) {
       console.info('No path set; trying to find default...')
-      installPath = steam.detectPath()
+      steam.detectRoot(true)
     } else {
-      installPath = options.path
+      steam.setRoot(options.path)
     }
 
     if (options.mode === 'b') {
@@ -123,29 +129,27 @@ async function run () {
       throw new Error(`Invalid mode: ${options.mode}; should be 'b', 'backup', 'r', or 'restore'.`)
     }
 
-    if (typeof installPath === 'string') {
-      console.info(`Path: ${installPath}`)
-      steam.setInstallPath(installPath)
-    } else {
-      console.error('Couldn\'t find default path to Steam.')
-      process.exit(1)
+    if (!steam.paths.rootPath) {
+      console.error('Could not find default path to Steam.')
     }
-    await steam.loadRegistry()
-    await steam.loadLoginusers()
+
+    await steam.load([steam.paths.registry, steam.paths.loginusers])
 
     if (options.user) {
       steam.setUser(options.user)
     } else {
-      steam.setUser(await steam.detectUser())
+      steam.detectUser(true)
     }
 
-    if (steam.user === null) {
-      console.error(`Error: No user associated with the Steam installation @ ${steam.loc}`)
+    steam.paths.id64 = steam.currentUser.id64
+    steam.paths.accountId = steam.currentUser.accountId
+
+    if (!steam.currentUser) {
+      console.error(`There are no users associated with the Steam installation at ${steam.paths.rootPath}`)
       process.exit(1)
     }
   } catch (err) {
-    console.error(err.message)
-    console.error(err.stack)
+    console.error(err)
     process.exit(1)
   }
 
@@ -162,4 +166,9 @@ async function run () {
   }
 }
 
-run()
+try {
+  run()
+} catch (err) {
+  console.error(err)
+  process.exit(1)
+}

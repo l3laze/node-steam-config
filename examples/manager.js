@@ -37,21 +37,18 @@ async function run () {
   }
 
   try {
-    let installPath = null
     if (options.path === null) {
       console.info('Trying to find default path to Steam...')
-      installPath = steam.detectPath()
-      if (installPath !== null) {
-        console.info(`Found default path: ${installPath}.`)
-        steam.setInstallPath(installPath)
-      } else {
+      steam.detectRoot(true)
+      if (!steam.paths.rootPath) {
         process.error('Couldn\'t find default path to Steam.')
         process.exit(1)
       }
+    } else {
+      steam.setRoot(options.path)
     }
 
-    await steam.loadRegistry()
-    await steam.loadLoginusers()
+    await steam.load([steam.paths.loginusers, steam.paths.registry])
 
     if (options.everything) {
       options.config = true
@@ -65,8 +62,8 @@ async function run () {
 
     if (options.user === null) {
       console.info('No user set; trying to detect current Steam user...')
-      steam.setUser(await steam.detectUser())
-      console.info(`Found user: ${steam.user.AccountName}.`)
+      await steam.detectUser(true)
+      console.info(`Found user: ${steam.currentUser.id64}.`)
     } else {
       await steam.setUser(options.user)
     }
@@ -97,9 +94,9 @@ async function run () {
     if (options.backup) {
       original = await saveOriginal()
 
-      console.info(`Backing up data for ${steam.user.AccountName}.`)
+      console.info(`Backing up data for ${steam.currentUser.id64}.`)
       if (options.config) {
-        await steam.loadConfig()
+        await steam.load(steam.paths.config)
 
         backup[ 'config' ] = {
           'InstallConfigStore': {
@@ -156,7 +153,7 @@ async function run () {
       }
 
       if (options.libraryfolders) {
-        await steam.loadLibraryfolders()
+        await steam.load(steam.paths.libraryfolders)
 
         backup[ 'libraryfolders' ] = steam.libraryfolders
 
@@ -165,9 +162,9 @@ async function run () {
       }
 
       if (options.sharedconfig) {
-        await steam.loadSharedconfig()
+        await steam.load(steam.paths.sharedconfig)
 
-        backup[ 'sharedconfig' ] = steam.sharedconfig
+        backup[ 'sharedconfig' ] = steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig
 
         delete backup.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.DesktopShortcutCheck
         delete backup.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.StartMenuShortcutCheck
@@ -175,9 +172,9 @@ async function run () {
       }
 
       if (options.localconfig) {
-        await steam.loadLocalconfig()
+        await steam.load(steam.paths.localconfig)
 
-        backup[ 'localconfig' ] = steam.localconfig
+        backup[ 'localconfig' ] = steam.loginusers.users[ steam.currentUser.id64 ].localconfig
 
         delete backup.localconfig.UserLocalConfigStore.broadcast.Permissions
         delete backup.localconfig.UserLocalConfigStore.broadcast.FirstTimeComplete
@@ -217,27 +214,27 @@ async function run () {
       }
 
       if (options.shortcuts) {
-        await steam.loadShortcuts()
+        await steam.load(steam.paths.shortcuts)
 
-        backup[ 'shortcuts' ] = steam.shortcuts
+        backup[ 'shortcuts' ] = steam.loginusers.users[ steam.currentUser.id64 ].shortcuts
       }
 
-      fs.writeFileSync(path.join(__dirname, 'data', `backup-${steam.user.accountID}.json`), JSON.stringify(backup, null, 2))
+      fs.writeFileSync(path.join(__dirname, 'data', `backup-${steam.currentUser.id64}.json`), JSON.stringify(backup, null, 2))
     } else if (options.restore) {
-      let restoring = path.join(__dirname, 'data', `backup-${steam.user.accountID}.json`)
-      original = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', `original-${steam.user.accountID}.json`)))
+      let restoring = path.join(__dirname, 'data', `backup-${steam.currentUser.id64}.json`)
+      original = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', `original-${steam.currentUser.id64}.json`)))
 
       if (fs.existsSync(restoring) === false) {
-        console.error(`There is no backup for ${steam.user.AccountName} to restore data from.`)
+        console.error(`There is no backup for ${steam.currentUser.id64} to restore data from.`)
         process.exit(1)
       }
 
-      console.info(`Restoring data for ${steam.user.AccountName}.`)
+      console.info(`Restoring data for ${steam.currentUser.id64}.`)
 
       let data = JSON.parse(fs.readFileSync(restoring))
 
       if (options.config && data.hasOwnProperty('config')) {
-        await steam.loadConfig()
+        await steam.load(steam.paths.config)
 
         steam.config.InstallConfigStore.Software.Valve.Steam.AutoUpdateWindowEnabled = data.config.InstallConfigStore.Software.Valve.Steam.AutoUpdateWindowEnabled
         steam.config.InstallConfigStore.Software.Valve.Steam.Accounts = data.config.InstallConfigStore.Software.Valve.Steam.Accounts
@@ -273,7 +270,7 @@ async function run () {
       }
 
       if (options.libraryfolders && data.hasOwnProperty('libraryfolders')) {
-        await steam.loadLibraryfolders()
+        await steam.load(steam.paths.libraryfolders)
 
         let dLibs = Object.values(data.libraryfolders)
         let cLibs = Object.values(steam.libraryfolders) || []
@@ -292,30 +289,30 @@ async function run () {
       }
 
       if (options.sharedconfig && data.hasOwnProperty('sharedconfig')) {
-        await steam.loadSharedconfig()
+        await steam.load(steam.paths.sharedconfig)
 
-        steam.sharedconfig = Object.assign(data.sharedconfig, steam.sharedconfig)
+        steam.sharedconfig = Object.assign(data.sharedconfig, steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig)
       }
 
       if (options.localconfig && data.hasOwnProperty('localconfig')) {
-        await steam.loadLocalconfig()
+        await steam.load(steam.paths.localconfig)
 
-        steam.localconfig.UserLocalConfigStore.broadcast = Object.assign(steam.localconfig.UserLocalConfigStore.broadcast, data.localconfig.UserLocalConfigStore.broadcast)
-        steam.localconfig.UserLocalConfigStore.friends = Object.assign(steam.localconfig.UserLocalConfigStore.friends, data.localconfig.UserLocalConfigStore.friends)
-        steam.localconfig.UserLocalConfigStore.friends = Object.assign(steam.localconfig.UserLocalConfigStore.friends, data.localconfig.UserLocalConfigStore.friends)
-        steam.localconfig.UserLocalConfigStore[ 'StartupState.Friends' ] = data.localconfig.UserLocalConfigStore[ 'StartupState.Friends' ]
-        steam.localconfig.UserLocalConfigStore.News = Object.assign(steam.localconfig.UserLocalConfigStore.News, data.localconfig.UserLocalConfigStore.News)
-        steam.localconfig.UserLocalConfigStore.HideSharingNotifications = data.localconfig.UserLocalConfigStore.HideSharingNotifications
+        steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.broadcast = Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.broadcast, data.localconfig.UserLocalConfigStore.broadcast)
+        steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.friends = Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.friends, data.localconfig.UserLocalConfigStore.friends)
+        steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.friends = Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.friends, data.localconfig.UserLocalConfigStore.friends)
+        steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore[ 'StartupState.Friends' ] = Object.assign({}, data.localconfig.UserLocalConfigStore[ 'StartupState.Friends' ])
+        steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.News = Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.News, data.localconfig.UserLocalConfigStore.News)
+        steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.HideSharingNotifications = Object.assign({}, data.localconfig.UserLocalConfigStore.HideSharingNotifications)
 
         if (data.platform !== steam.platform) {
           delete steam.localconfig.UserLocalConfigStore.system.PushToTalkKey
         }
 
-        steam.localconfig.UserLocalConfigStore.system = Object.assign(steam.localconfig.UserLocalConfigStore.system, data.localconfig.UserLocalConfigStore.system)
+        steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.system = Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].localconfig.UserLocalConfigStore.system, data.localconfig.UserLocalConfigStore.system)
       }
 
       if (options.shortcuts && data.hasOwnProperty('shortcuts')) {
-        await steam.loadShortcuts()
+        await steam.load(steam.paths.shortcuts)
 
         if (data.platform === steam.platform) {
           steam.shortcuts.shortcuts = Object.assign(steam.shortcuts.shortcuts, data.shortcuts.shortcuts)
@@ -323,7 +320,7 @@ async function run () {
       }
 
       let restored = Object.assign({}, steam)
-      let temp = restored.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps
+      let temp = restored.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps
 
       delete restored.steamapps
       delete restored.userdata
@@ -338,10 +335,9 @@ async function run () {
         console.error('Restored data is okay.')
       }
 
-      restored.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps = temp
+      restored.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps = temp
 
       fs.writeFileSync(path.join(__dirname, 'data', `restore-${steam.user.accountID}.json`), JSON.stringify(restored, null, 2))
-      await steam.saveBinaryVDF(steam.getPathTo('shortcuts'), steam.shortcuts, 'shortcuts')
     }
   } catch (err) {
     console.error(err)

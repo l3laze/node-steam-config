@@ -20,7 +20,7 @@ function SteamConfig () {
   this.paths = new SteamPaths()
 
   this.appendToApps = false
-  this.tags
+  this.tags = null
 
   this.appinfo = null
   this.config = null
@@ -267,6 +267,7 @@ SteamConfig.prototype.save = async function save (entries) {
           break
 
         case 'registry':
+          let winreg
           if (platform === 'darwin') {
             tmp = path.join(this.rootPath, 'registry.vdf')
             data = '' + await fs.readFileAsync(tmp)
@@ -276,8 +277,8 @@ SteamConfig.prototype.save = async function save (entries) {
             data = '' + await fs.readFileAsync(tmp)
             data = await TVDF.parse(data)
           } else if (platform === 'win32') {
-            const winreg = new Registry('HKCU\\Software\\Valve\\Steam')
             tmp = 'winreg'
+            winreg = new Registry('HKCU\\Software\\Valve\\Steam')
             data = { 'Registry': { 'HKCU': { 'Software': { 'Valve': { 'Steam': {
               'language': await winreg.get('language'),
               'RunningAppID': await winreg.get('RunningAppID'),
@@ -290,7 +291,9 @@ SteamConfig.prototype.save = async function save (entries) {
               'SkinV4': await winreg.get('SkinV4')
             }}}}}}
           }
+
           this.registry = Object.assign(data, this.registry)
+
           if (tmp !== 'winreg') {
             await fs.writeFileSync(tmp, TVDF.stringify(this.registry, true))
           } else {
@@ -364,7 +367,7 @@ SteamConfig.prototype.setUser = function setUser (toUser) {
     throw new Error(`${toUser} is an invalid user identifier.`)
   }
 
-  this.currentUser = Object.assign(tmp)
+  this.currentUser = Object.assign({}, tmp)
 
   delete this.currentUser.localconfig
   delete this.currentUser.sharedconfig
@@ -380,7 +383,7 @@ SteamConfig.prototype.strip = function (name) {
 
   switch (name) {
     case 'steamapps':
-      data = Object.assign(this.steamapps)
+      data = Object.assign({}, this.steamapps)
       data.map(a => {
         delete a.library
         delete a.path
@@ -388,7 +391,7 @@ SteamConfig.prototype.strip = function (name) {
       break
 
     case 'loginusers':
-      data = Object.assign(this.loginusers)
+      data = Object.assign({}, this.loginusers)
       keys = Object.keys(data)
       keys.forEach(u => {
         delete data[ u ].localconfig
