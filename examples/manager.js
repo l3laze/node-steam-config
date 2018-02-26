@@ -73,11 +73,6 @@ async function run () {
       process.exit(0)
     }
 
-    if (options.backup === false && options.restore === false) {
-      console.error('No mode set...nothing to do!')
-      process.exit(0)
-    }
-
     if (options.config === false &&
         options.loginusers === false &&
         options.registry === false &&
@@ -92,7 +87,7 @@ async function run () {
     }
 
     if (options.backup) {
-      original = await saveOriginal()
+      original = await cleanData()
 
       console.info(`Backing up data for ${steam.currentUser.id64}.`)
       if (options.config) {
@@ -323,11 +318,14 @@ async function run () {
       let temp = restored.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps
 
       delete restored.steamapps
-      delete restored.userdata
+      Object.keys(restored.loginusers.users).forEach(u => {
+        delete restored.loginusers.users[ u ].localconfig
+        delete restored.loginusers.users[ u ].sharedconfig
+        delete restored.loginusers.users[ u ].shortcuts
+      })
       delete restored.appinfo
-      delete restored.packageinfo
 
-      restored.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps = {}
+      restored.loginusers.users[ steam.currentUser.id64 ].sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps = {}
 
       if (JSON.stringify(original) !== JSON.stringify(restored)) {
         console.error('Restored data is invalid...')
@@ -345,25 +343,106 @@ async function run () {
   }
 }
 
-async function saveOriginal () {
-  steam.setInstallPath(steam.detectPath())
-  await steam.loadConfig()
-  await steam.loadLoginusers()
-  await steam.loadRegistry()
-  steam.setUser(await steam.detectUser())
-  await steam.loadLibraryfolders()
-  await steam.loadSharedconfig()
-  await steam.loadLocalconfig()
-  await steam.loadShortcuts()
+async function cleanData () {
+  let original = {
+    config: {
+      'InstallConfigStore': {
+        'Software': {
+          'Valve': {
+            'Steam': {
+              'AutoUpdateWindowEnabled': steam.config.InstallConfigStore.Software.Valve.Steam.AutoUpdateWindowEnabled,
+              'Accounts': steam.config.InstallConfigStore.Software.Valve.Steam.Accounts,
+              'NoSavePersonalInfo': steam.config.InstallConfigStore.Software.Valve.Steam.NoSavePersonalInfo,
+              'MaxServerBrowserPingsPerMin': steam.config.InstallConfigStore.Software.Valve.Steam.MaxServerBrowserPingsPerMin,
+              'DownloadThrottleKbps': steam.config.InstallConfigStore.Software.Valve.Steam.DownloadThrottleKbps,
+              'AllowDownloadsDuringGameplay': steam.config.InstallConfigStore.Software.Valve.Steam.AllowDownloadsDuringGameplay,
+              'StreamingThrottleEnabled': steam.config.InstallConfigStore.Software.Valve.Steam.StreamingThrottleEnabled,
+              'ClientBrowserAuth': steam.config.InstallConfigStore.Software.Valve.Steam.ClientBrowserAuth
+            }
+          }
+        },
+        'Music': {
+          'MusicVolume': steam.config.InstallConfigStore.Music.MusicVolume,
+          'CrawlSteamInstallFolders': steam.config.InstallConfigStore.Music.CrawlSteamInstallFolders,
+          'PauseOnVoiceChat': steam.config.InstallConfigStore.Music.PauseOnVoiceChat,
+          'PlaylistNowPlayingNotification': steam.config.InstallConfigStore.Music.PlaylistNowPlayingNotification,
+          'MusicPlayerVisible': steam.config.InstallConfigStore.Music.MusicPlayerVisible
+        }
+      }
+    },
+    localconfig: Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].localconfig),
+    loginusers: Object.assign({}, steam.loginusers),
+    registry: {
+      'Registry': {
+        'HKCU': {
+          'Software': {
+            'Valve': {
+              'Steam': {
+                language: steam.registry.Registry.HKCU.Software.Valve.Steam.language
+              }
+            }
+          }
+        }
+      }
+    },
+    shortcuts: Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].shortcuts),
+    sharedconfig: Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig)
+  }
 
-  delete steam.steamapps
-  delete steam.userdata
-  delete steam.appinfo
-  delete steam.packageinfo
+  let uKeys = Object.keys(original.loginusers.users)
 
-  fs.writeFileSync(path.join(__dirname, 'data', `original-${steam.user.accountID}.json`), JSON.stringify(steam, null, 2))
+  uKeys.forEach(u => {
+    if (u !== steam.currentUser.id64) {
+      delete original.loginusers.users[ u ]
+    } else {
+      delete original.loginusers.users[ u ].Timestamp
+      delete original.loginusers.users[ u ].localconfig
+      delete original.loginusers.users[ u ].sharedconfig
+      delete original.loginusers.users[ u ].shortcuts
+    }
+  })
 
-  return Object.assign({}, steam)
+  delete original.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.DesktopShortcutCheck
+  delete original.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.StartMenuShortcutCheck
+  delete original.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.SSAVersion
+
+  delete original.localconfig.UserLocalConfigStore.broadcast.Permissions
+  delete original.localconfig.UserLocalConfigStore.broadcast.FirstTimeComplete
+  delete original.localconfig.UserLocalConfigStore.ParentalSettings
+  delete original.localconfig.UserLocalConfigStore.broadcast.FirstTimeComplete
+
+  let friends = Object.assign({}, original.localconfig.UserLocalConfigStore.friends)
+
+  delete original.localconfig.UserLocalConfigStore.friends
+
+  original.localconfig.UserLocalConfigStore[ 'friends' ] = {
+    'VoiceReceiveVolume': friends.VoiceReceiveVolume,
+    'Notifications_ShowIngame': friends.Notifications_ShowIngame,
+    'Sounds_PlayIngame': friends.Sounds_PlayIngame,
+    'Notifications_ShowOnline': friends.Notifications_ShowOnline,
+    'Sounds_PlayOnline': friends.Sounds_PlayOnline,
+    'Notifications_ShowMessage': friends.Notifications_ShowMessage,
+    'Sounds_PlayMessage': friends.Sounds_PlayMessage,
+    'AutoSignIntoFriends': friends.AutoSignIntoFriends,
+    'ShowTimeInChatLogCheck': friends.ShowTimeInChatLogCheck,
+    'AlwaysNewChatWindow': friends.AlwaysNewChatWindow,
+    'Notifications_EventsAndAnnouncements': friends.Notifications_EventsAndAnnouncements,
+    'Sounds_EventsAndAnnouncements': friends.Sounds_EventsAndAnnouncements,
+    'ChatFlashMode': friends.ChatFlashMode,
+    'PersonaStateDesired': friends.PersonaStateDesired
+  }
+
+  delete original.localconfig.UserLocalConfigStore.Licenses
+  delete original.localconfig.UserLocalConfigStore.apptickets
+  delete original.localconfig.UserLocalConfigStore.AppInfoChangeNumber
+  delete original.localconfig.UserLocalConfigStore.CloudKey
+  delete original.localconfig.UserLocalConfigStore.CloudKeyCRC
+  delete original.localconfig.UserLocalConfigStore.Software
+  delete original.localconfig.UserLocalConfigStore.News.Messages
+  delete original.localconfig.UserLocalConfigStore.depots
+  delete original.localconfig.UserLocalConfigStore.offline
+
+  return original
 }
 
 run()
