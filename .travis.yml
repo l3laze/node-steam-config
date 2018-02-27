@@ -1,4 +1,10 @@
-language: nodejs
+language:
+  - node_js
+  - version: "lts"
+
+os:
+  - osx
+  - linux
 
 cache:
   yarn: true
@@ -6,10 +12,8 @@ cache:
     - node_modules
 
 before_install:
-
-- npm i npm -g
-- npm i yarn -g
+  - npm i -g yarn
+  - yarn
 
 script:
-- mocha test
-
+  - yarn test
