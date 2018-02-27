@@ -1,7 +1,7 @@
 'use strict'
 
 function set (obj, path, val) {
-  let prop = Object.assign({}, path)
+  let prop = '' + path
 
   path = path.split('.')
 
@@ -19,7 +19,7 @@ function set (obj, path, val) {
 }
 
 function get (obj, path) {
-  let prop = Object.assign({}, path)
+  let prop = '' + path
 
   path = path.split('.')
 

@@ -113,7 +113,7 @@ describe('SteamConfig', function () {
     it('should set the user if detected based on identifer', async function () {
       await steam.load(steam.paths.loginusers)
       steam.setUser('l3l_aze')
-      steam.currentUser.should.equal('76561198067577712')
+      steam.currentUser.id64.should.equal('76561198067577712')
     })
 
     it('should throw an error if the user is not found', async function () {

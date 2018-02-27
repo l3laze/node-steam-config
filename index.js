@@ -383,7 +383,7 @@ SteamConfig.prototype.strip = function (name) {
 
   switch (name) {
     case 'steamapps':
-      data = Object.assign({}, this.steamapps)
+      data = Object.assign([], this.steamapps)
       data.map(a => {
         delete a.library
         delete a.path
