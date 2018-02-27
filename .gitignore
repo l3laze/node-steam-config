@@ -8,3 +8,5 @@ test/\.DS_Store
 \.DS_Store
 
 examples/data/
+
+steam-dummy/

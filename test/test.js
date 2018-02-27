@@ -1,7 +1,6 @@
 /* eslint-env mocha */
 'use strict'
 
-const fs = require('fs')
 const path = require('path')
 const SteamConfig = require('../index.js')
 const Dummy = require('steam-dummy')
@@ -12,11 +11,12 @@ let dumbass = new Dummy()
 let steam
 let pathTo = path.join(__dirname, 'Dummy')
 
-if (!fs.existsSync(pathTo)) {
-  dumbass.makeDummy(pathTo)
+try {
+  dumbass.makeDummy(pathTo, true)
+  console.info(`Dummy data created - ${dumbass.created.length}`)
+} catch (err) {
+  throw new Error(err)
 }
-
-console.info('Dummy data created.')
 
 describe('SteamConfig', function () {
   beforeEach(function () {

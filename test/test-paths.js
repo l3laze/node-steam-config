@@ -1,7 +1,6 @@
 /* eslint-env mocha */
 'use strict'
 
-const fs = require('fs')
 const path = require('path')
 const SteamPaths = require('../steam-paths.js')
 const Dummy = require('steam-dummy')
@@ -15,11 +14,14 @@ const id64 = '76561198067577712'
 const accountId = '107311984'
 const home = require('os').homedir()
 
-if (!fs.existsSync(pathTo)) {
-  dumbass.makeDummy(pathTo)
+try {
+  dumbass.makeDummy(pathTo, false)
+  if (dumbass.created > 0) {
+    console.info(`Dummy data created - ${dumbass.created.length}`)
+  }
+} catch (err) {
+  throw new Error(err)
 }
-
-console.info('Dummy data created.')
 
 describe('SteamPaths', function () {
   describe('#constructor', function () {
