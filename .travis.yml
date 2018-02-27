@@ -1,0 +1,15 @@
+language: nodejs
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+before_install:
+
+- npm i npm -g
+- npm i yarn -g
+
+script:
+- mocha test
+
