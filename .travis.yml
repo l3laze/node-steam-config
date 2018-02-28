@@ -24,5 +24,4 @@ script:
 
 after_success:
   - chmod 0755 /Users/travis/build/l3laze/node-steam-config/.nyc_output
-  - yarn run cover
   - yarn run coverage
