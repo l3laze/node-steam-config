@@ -1,8 +1,8 @@
 # node-steam-config
 
-[![Travis-CI Build Status](https://travis-ci.org/l3laze/node-steam-config.svg?branch=master)](https://travis-ci.org/l3laze/node-steam-config) [![Coverage Status](https://coveralls.io/repos/github/l3laze/SteamConfig/badge.svg?branch=master)](https://coveralls.io/github/l3laze/SteamConfig?branch=master)
+[![Travis-CI Build Status](https://travis-ci.org/l3laze/node-steam-config.svg?branch=master)](https://travis-ci.org/l3laze/node-steam-config) [![Coverage Status](https://coveralls.io/repos/github/l3laze/node-steam-config/badge.svg?branch=master)](https://coveralls.io/github/l3laze/node-steam-config?branch=master)
 
-[![GitHub issues](https://img.shields.io/github/issues/l3laze/node-steam-config.svg)](https://github.com/l3laze/node-steam-config/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/badges/shields.svg)](https://github.com/l3laze/node-steam-config/issues?q=is%3Aopen)
+[![GitHub issues](https://img.shields.io/github/issues/l3laze/node-steam-config.svg)](https://github.com/l3laze/node-steam-config/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/badges/shields.svg)](https://github.com/l3laze/node-steam-config/issues?utf8=✓&q=is%3Aclosed+is%3Aissue)
 
 [![Dependencies](https://img.shields.io/david/expressjs/express.svg)](https://github.com/l3laze/node-steam-config)
 
