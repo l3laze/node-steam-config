@@ -10,3 +10,9 @@ test/\.DS_Store
 examples/data/
 
 steam-dummy/
+
+\.nyc_output/
+
+coverage/
+
+yarn-error\.log

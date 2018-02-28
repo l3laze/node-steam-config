@@ -76,11 +76,11 @@ async function backup () {
     platform: os.platform(),
 
     config: Object.assign({}, steam.config),
-    localconfig: Object.assign({}, steam. loginusers.users[ steam.currentUser.id64 ].localconfig),
+    localconfig: Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].localconfig),
     loginusers: Object.assign({}, steam.config),
     registry: Object.assign({}, steam.config),
-    sharedconfig: Object.assign({}, steam. loginusers.users[ steam.currentUser.id64 ]. sharedconfig),
-    shortcuts: Object.assign({}, steam. loginusers.users[ steam.currentUser.id64 ]. shortcuts)
+    sharedconfig: Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig),
+    shortcuts: Object.assign({}, steam.loginusers.users[ steam.currentUser.id64 ].shortcuts)
   }
 
   let tmp = steam.loginusers.users[ steam.currentUser.id64 ]
@@ -99,13 +99,12 @@ async function restore () {
   let file = path.join(options.destination, `backup-${steam.currentUser.id64}.json`)
   let data = await fs.writeFile(file, JSON.stringify)
 
-    steam.config = Object.assign(steam.config, data.config)
-    steam.loginusers = Object.assign(steam.loginusers, data.loginusers),
-    steam.registry = Object.assign(steam.registry, data.registry),
-    steam.loginusers.users[ data.user.id64 ].sharedconfig = Object.assign(steam.loginusers.users[ data.user.id64 ].sharedconfig, data.sharedconfig),
-    steam.loginusers.users[ data.user.id64 ]. localconfig = Object.assign(steam.loginusers.users[ data.user.id64 ].localconfig, data. localconfig),
-    steam.loginusers.users[ data.user.id64 ]. shortcuts = Object.assign(steam.loginusers.users[ data.user.id64 ].shortcuts, data.shortcuts)
-  }
+  steam.config = Object.assign(steam.config, data.config)
+  steam.loginusers = Object.assign(steam.loginusers, data.loginusers)
+  steam.registry = Object.assign(steam.registry, data.registry)
+  steam.loginusers.users[ data.user.id64 ].sharedconfig = Object.assign(steam.loginusers.users[ data.user.id64 ].sharedconfig, data.sharedconfig)
+  steam.loginusers.users[ data.user.id64 ].localconfig = Object.assign(steam.loginusers.users[ data.user.id64 ].localconfig, data.localconfig)
+  steam.loginusers.users[ data.user.id64 ].shortcuts = Object.assign(steam.loginusers.users[ data.user.id64 ].shortcuts, data.shortcuts)
 }
 
 try {

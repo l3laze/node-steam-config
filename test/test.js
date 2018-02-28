@@ -4,7 +4,7 @@
 const path = require('path')
 const SteamConfig = require('../index.js')
 const Dummy = require('steam-dummy')
-require('chai').should() // eslint-disable-line no-unused-vars
+const should = require('chai').should() // eslint-disable-line no-unused-vars
 
 let dumbass = new Dummy()
 
@@ -28,16 +28,19 @@ describe('SteamConfig', function () {
   })
 
   describe('#detectRoot(autoSet)', function () {
+    if (new SteamConfig().detectRoot() === null) {
+      console.error('Error: Steam has not been installed on this machine; cannot test detectRoot.')
+      this.pending = true
+    }
+
     it('should detect & set the default path if autoSet is true', function detectRootAndAutoSet () {
       steam.detectRoot(true)
-
-      steam.rootPath.should.not.equal(undefined)
+      should.not.equal(steam.rootPath, null)
     })
 
     it('should detect & return the default path if autoSet is false', function detectRootAndReturn () {
       let detected = steam.detectRoot()
-
-      detected.should.not.equal(undefined)
+      should.not.equal(detected, null)
     })
   })
 

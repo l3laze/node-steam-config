@@ -64,7 +64,7 @@ SteamConfig.prototype.detectRoot = function detectRoot (autoSet = false) {
   }
 
   if (!fs.existsSync(detected)) {
-    detected = undefined
+    detected = null
   }
 
   if (autoSet && detected) {

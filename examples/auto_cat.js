@@ -3,14 +3,12 @@
 // const fs = require('fs')
 // const path = require('path')
 const SteamConfig = require('../index.js')
-const BB = require('bluebird')
-const fs = BB.promisifyAll(require('fs'))
 const path = require('path')
 const cli = require('cli')
 
 const requestOwnedApps = require('../steamdata-utils.js').requestOwnedApps
 const requestTags = require('../steamdata-utils.js').requestTags
-const requestGenres = require('../steamdata-utils.js').requestGenres
+// const requestGenres = require('../steamdata-utils.js').requestGenres
 
 /*
  * Slightly increased console width for 'cli' because
@@ -227,7 +225,7 @@ function addCat (app, cat) {
   let cats
   let index
 
-  if(!app.tags) {
+  if (!app.tags) {
     app.tags = {}
   }
   cats = Object.values(app.tags)
