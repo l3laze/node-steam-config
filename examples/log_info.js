@@ -10,7 +10,7 @@ let steam = new SteamConfig();
     await steam.load(steam.paths.all.concat([ steam.paths.steamapps() ]))
 
     steam.appendToApps = true
-    let tmp = Object.values(steam.libraryfolders.LibraryFolders);
+    let tmp = Object.values(steam.libraryfolders.LibraryFolders)
 
     for (let f of tmp) {
       await steam.load(steam.paths.steamapps(f))
@@ -20,7 +20,7 @@ let steam = new SteamConfig();
     console.info('appinfo:', steam.appinfo.length)
     console.info('config:', steam.config ? 'exists' : 'nope')
     console.info('libraryfolders:', Object.keys(steam.libraryfolders).length)
-    console.info('registry:', steam.registry ? 'exists': 'nope')
+    console.info('registry:', steam.registry ? 'exists' : 'nope')
     console.info('skins:', steam.skins.length)
     console.info('steamapps:', steam.steamapps.length)
     console.info('loginusers:', Object.keys(steam.loginusers).length)
