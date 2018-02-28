@@ -23,4 +23,5 @@ script:
   - yarn test
 
 after_success:
+  - chmod 0755 .nyc_output
   - yarn run coverage
