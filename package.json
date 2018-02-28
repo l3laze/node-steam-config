@@ -6,6 +6,10 @@
   "copyright": "Copyright © 2017 ${author}",
   "description": "Library to help read/modify/write the Steam Client's configuration.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+github.com/l3laze/node-steam-config.git"
+  },
   "dependencies": {
     "bluebird": "^3.5.1",
     "bytebuffer": "^5.0.1",
@@ -30,6 +34,6 @@
     "lint": "yarn standard",
     "test": "mocha",
     "cover": "nyc mocha",
-    "coveralls": "yarn cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   }
 }
