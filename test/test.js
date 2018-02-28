@@ -28,27 +28,19 @@ describe('SteamConfig', function () {
   })
 
   describe('#detectRoot(autoSet)', function () {
-    it('should detect & set the default path if autoSet is true', function detectRootAndAutoSet () {
-      let def = steam.detectRoot()
+    if (new SteamConfig().detectRoot() === null) {
+      console.error('Error: Steam has not been installed on this machine; cannot test detectRoot.')
+      this.pending = true
+    }
 
-      if (def) {
-        steam.detectRoot(true)
-        should.not.equal(steam.rootPath, null)
-      } else if (!def) {
-        throw new Error('Steam has not been installed on this machine.')
-      }
+    it('should detect & set the default path if autoSet is true', function detectRootAndAutoSet () {
+      steam.detectRoot(true)
+      should.not.equal(steam.rootPath, null)
     })
 
     it('should detect & return the default path if autoSet is false', function detectRootAndReturn () {
-      let def = steam.detectRoot()
-
-      if (def) {
-        let detected = steam.detectRoot()
-
-        should.not.equal(detected, null)
-      } else if (!def) {
-        throw new Error('Steam has not been installed on this machine.')
-      }
+      let detected = steam.detectRoot()
+      should.not.equal(detected, null)
     })
   })
 
