@@ -32,10 +32,6 @@ function SteamConfig () {
 }
 
 SteamConfig.prototype.detectRoot = function detectRoot (autoSet = false) {
-  if (typeof autoSet !== 'boolean') {
-    autoSet = false
-  }
-
   let detected
 
   switch (platform) {
@@ -80,7 +76,7 @@ SteamConfig.prototype.setRoot = function setRoot (toPath) {
   } else if (!fs.existsSync(toPath)) {
     throw new Error(`${toPath} does not exist.`)
   } else if (!fs.existsSync(path.join(toPath, 'config', 'config.vdf')) || !fs.existsSync(path.join(toPath, 'userdata'))) {
-    throw new Error(`${toPath} does not seem to be a valid Steam installation. If it's a new installation login to the client and try again.`)
+    throw new Error(`${toPath} does not seem to be a valid Steam installation. If it is a new installation login to the client and try again.`)
   }
 
   this.paths.rootPath = toPath

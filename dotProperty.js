@@ -5,10 +5,6 @@ function set (obj, path, val) {
 
   path = path.split('.')
 
-  if (path[ 0 ] === '') {
-    path.length = 0
-  }
-
   if (obj.hasOwnProperty(prop)) {
     obj[ prop ] = val
   } else if (path.length !== 0 && obj.hasOwnProperty(path[ 0 ])) {
@@ -22,10 +18,6 @@ function get (obj, path) {
   let prop = '' + path
 
   path = path.split('.')
-
-  if (path[ 0 ] === '') {
-    path.length = 0
-  }
 
   if (obj.hasOwnProperty(prop)) {
     return obj[ prop ]
