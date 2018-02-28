@@ -34,6 +34,6 @@
     "lint": "yarn standard",
     "test": "mocha",
     "cover": "nyc mocha",
-    "coverage": "nyc mocha && nyc report --reporter=text-lcov | coveralls && rm -rf ./coverage"
+    "coverage": "nyc report --reporter=text-lcov | coveralls && rm -rf ./coverage"
   }
 }
