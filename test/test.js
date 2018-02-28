@@ -31,13 +31,13 @@ describe('SteamConfig', function () {
     it('should detect & set the default path if autoSet is true', function detectRootAndAutoSet () {
       steam.detectRoot(true)
 
-      steam.rootPath.should.not.equal(undefined)
+      steam.rootPath.should.not.equal(null)
     })
 
     it('should detect & return the default path if autoSet is false', function detectRootAndReturn () {
       let detected = steam.detectRoot()
 
-      detected.should.not.equal(undefined)
+      detected.should.not.equal(null)
     })
   })
 
