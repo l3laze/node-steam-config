@@ -16,3 +16,7 @@ steam-dummy/
 coverage/
 
 yarn-error\.log
+
+docs/
+
+test/data/

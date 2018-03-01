@@ -2,7 +2,7 @@
 'use strict'
 
 const path = require('path')
-const SteamConfig = require('../index.js')
+const SteamConfig = require('../lib/index.js')
 const Dummy = require('steam-dummy')
 const should = require('chai').should() // eslint-disable-line no-unused-vars
 

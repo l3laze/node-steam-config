@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 'use strict'
 
-const dotProperty = require('../dotProperty.js')
+const dotProperty = require('../lib/dotProperty.js')
 
 const should = require('chai').should()
 

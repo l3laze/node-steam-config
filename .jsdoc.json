@@ -1,0 +1,37 @@
+{
+    "plugins": [
+      "plugins/markdown"
+    ],
+    "source": {
+        "include": [
+          "./lib/index.js",
+          "./lib/steam-paths.js",
+          "./lib/steamdata-utils.js"
+        ]
+    },
+    "sourceType": "module",
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc", "closure"]
+    },
+    "templates": {
+        "monospaceLinks": true,
+        "default": {
+          "includeDate": false,
+          "outputSourceFiles": false
+        },
+        "includeDate": false,
+        "navType": "vertical",
+        "linenums": true,
+        "collapseSymbols": true,
+        "inverseNav": true,
+        "includeSource": false
+    },
+    "opts": {
+      "destination": "./docs",
+      "encoding": "utf8",
+      "recurse": false,
+      "sort": false,
+      "access": "all"
+    }
+}

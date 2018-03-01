@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 'use strict'
 
-const SteamSettings = require('../steam-settings.js')
+const SteamSettings = require('../lib/steam-settings.js')
 require('chai').should() // eslint-disable-line no-unused-vars
 
 let testData
