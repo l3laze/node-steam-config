@@ -45,32 +45,54 @@ describe('SteamConfig', function () {
   })
 
   describe('#setRoot(toPath)', function () {
-    it('should accept a string value as the argument', function setRootToDummy () {
-      steam.setRoot(pathTo)
-    })
-
-    it('should not accept a non-string value as the argument', function setRootOnlyLikesStrings () {
+    it('should throw for a non-string or empty arg', function setRootThrowsForBadArgs () {
       try {
         steam.setRoot(8675309)
 
-        throw new Error('It did not throw an error for an invalid argument.')
+        throw new Error('Did not fail.')
       } catch (err) {
         if (err.message.indexOf('is an invalid path argument') === -1) {
           throw new Error(err)
         }
       }
-    })
 
-    it('should not accept a non-existent path as the argument', function setRootOnlyLikesPathsThatExist () {
       try {
-        steam.setRoot(path.join('Batman'))
+        steam.setRoot()
 
-        throw new Error('It did not throw an error for an invalid argument.')
+        throw new Error('Did not fail.')
       } catch (err) {
-        if (err.message.indexOf('does not exist') === -1) {
+        if (err.message.indexOf('is an invalid path argument.') === -1) {
           throw new Error(err)
         }
       }
+    })
+
+    it('should throw for an invalid root path', function setRootThrowsForInvalid () {
+      try {
+        steam.setRoot(__dirname)
+
+        throw new Error('Did not fail.')
+      } catch (err) {
+        if (err.message.indexOf('does not seem to be a valid Steam installation.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should throw for a nonexistent path', function setRootThrowsForNonexistent () {
+      try {
+        steam.setRoot(path.join(__dirname, 'Batman'))
+
+        throw new Error('Did not fail.')
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should accept a string value as the argument', function setRootWorks () {
+      steam.setRoot(pathTo)
     })
   })
 })
@@ -92,14 +114,6 @@ describe('SteamConfig', function () {
   })
 
   describe('#detectUser', function () {
-    it('should detect the user if possible', async function () {
-      await steam.load([steam.paths.loginusers, steam.paths.registry])
-      steam.registry.should.be.a('object')
-      steam.loginusers.should.be.a('object')
-      let user = steam.detectUser()
-      user.should.equal('76561198067577712')
-    })
-
     it('should throw an error if a user is not found', function () {
       try {
         let user = steam.detectUser()
@@ -110,15 +124,25 @@ describe('SteamConfig', function () {
         }
       }
     })
+
+    it('should detect the user if possible', async function () {
+      await steam.load([steam.paths.loginusers, steam.paths.registry])
+      steam.registry.should.be.a('object')
+      steam.loginusers.should.be.a('object')
+      let user = steam.detectUser()
+      user.should.equal('76561198067577712')
+    })
+
+    it('should detect and set the user if possible', async function () {
+      await steam.load([steam.paths.loginusers, steam.paths.registry])
+      steam.registry.should.be.a('object')
+      steam.loginusers.should.be.a('object')
+      steam.detectUser(true)
+      steam.currentUser.id64.should.equal('76561198067577712')
+    })
   })
 
   describe('#setUser(identifer)', function () {
-    it('should set the user if detected based on identifer', async function () {
-      await steam.load(steam.paths.loginusers)
-      steam.setUser('l3l_aze')
-      steam.currentUser.id64.should.equal('76561198067577712')
-    })
-
     it('should throw an error if the user is not found', async function () {
       try {
         await steam.load(steam.paths.loginusers)
@@ -129,14 +153,34 @@ describe('SteamConfig', function () {
         }
       }
     })
+
+    it('should set the user if detected based on identifer', async function () {
+      await steam.load(steam.paths.loginusers)
+      steam.setUser('l3l_aze')
+      steam.currentUser.id64.should.equal('76561198067577712')
+    })
   })
 
   describe('#load(name)', function () {
-    it('should throw an error for an invalid argument', async function () {
+    it('should throw an error for an unknown entry', async function () {
       try {
         await steam.load('something')
+
+        throw new Error('Did not fail.')
       } catch (err) {
         if (err.message.indexOf('Cannot load unknown entry type') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should throw an error for an invalid argument', async function () {
+      try {
+        await steam.load({something: 'something, something; blah blah blah.'})
+
+        throw new Error('Did not fail.')
+      } catch (err) {
+        if (err.message.indexOf('is an invalid arg. Should be a string, or an array of strings.') === -1) {
           throw new Error(err)
         }
       }
@@ -206,7 +250,7 @@ describe('SteamConfig', function () {
   })
 
   describe('#save(name)', function () {
-    it('should throw an error for an invalid argument', async function () {
+    it('should throw an error for an unknown entry', async function () {
       try {
         await steam.save('something')
       } catch (err) {
@@ -216,7 +260,19 @@ describe('SteamConfig', function () {
       }
     })
 
-    it('should save config as requested', async function loadConfig () {
+    it('should throw an error for an invalid argument', async function () {
+      try {
+        await steam.save({something: 'something, something; blah blah blah.'})
+
+        throw new Error('Did not fail.')
+      } catch (err) {
+        if (err.message.indexOf('is an invalid arg. Should be a string, or an array of strings.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should save config as requested', async function saveConfig () {
       let original
       let modified
 
@@ -227,7 +283,7 @@ describe('SteamConfig', function () {
       original.InstallConfigStore.should.equal(modified.InstallConfigStore)
     })
 
-    it('should save loginusers as requested', async function loadLoginUsers () {
+    it('should save loginusers as requested', async function saveLoginUsers () {
       let original
       let modified
 
@@ -238,7 +294,7 @@ describe('SteamConfig', function () {
       original.should.equal(modified)
     })
 
-    it('should save localconfig as requested', async function loadLocalConfig () {
+    it('should save localconfig as requested', async function saveLocalConfig () {
       let original
       let modified
 
@@ -249,7 +305,7 @@ describe('SteamConfig', function () {
       original.should.equal(modified)
     })
 
-    it('should save sharedconfig as requested', async function loadSharedConfig () {
+    it('should save sharedconfig as requested', async function saveSharedConfig () {
       let original
       let modified
 
@@ -260,7 +316,38 @@ describe('SteamConfig', function () {
       original.should.equal(modified)
     })
 
-    it('should save an app as requested', async function loadConfig () {
+    it('should save registry as requested', async function saveRegistry () {
+      let original
+      let modified
+
+      await steam.load(steam.paths.registry)
+      original = JSON.stringify(Object.assign(steam.registry))
+      await steam.save(steam.paths.registry)
+      modified = JSON.stringify(Object.assign(steam.registry))
+      original.should.equal(modified)
+    })
+
+    it('should throw if an app cannot be found', async function saveAppThrows () {
+      let original
+      let modified
+      try {
+        await steam.load(steam.paths.steamapps())
+        let app = steam.steamapps[ 0 ]
+        original = steam.strip('steamapps')[ 0 ]
+        steam.steamapps[ 0 ].AppState.StateFlags = '512'
+        await steam.save(steam.paths.app(app.AppState.appid + 1, app.library))
+        modified = steam.strip('steamapps')[ 0 ]
+        original.should.equal(modified)
+
+        throw new Error('Did not fail.')
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should save an app as requested', async function saveAppWorks () {
       let original
       let modified
 

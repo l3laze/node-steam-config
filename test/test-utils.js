@@ -60,7 +60,7 @@ describe('requestOwnedApps', function () {
   })
 
   it('should get the list of owned apps from the internet and cache them', async function requestOwnedAppsValid () {
-    this.timeout(10000)
+    this.timeout(15000)
     let owned = await requestOwnedApps('76561198067577712', true, {enabled: true, folder: path.join(__dirname, 'data')})
     owned.length.should.not.equal(0)
   })

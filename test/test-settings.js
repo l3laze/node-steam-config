@@ -126,7 +126,8 @@ describe('SteamSettings', function () {
           'UsePushToTalk': '1',
           'PushToTalkKey': '42',
           'GameOverlayHomePage': 'https://www.google.com'
-        }
+        },
+        'LastInstallFolderIndex': '1'
       },
       'UserRoamingConfigStore': {
         'Software': {
@@ -164,6 +165,19 @@ describe('SteamSettings', function () {
   })
 
   describe('#set', function () {
+    it('should throw an error when given invalid arguments', function () {
+      let tmp = new SteamSettings()
+      try {
+        testData = tmp.set(testData, 'language', 'Batman', undefined)
+
+        throw new Error('did not fail')
+      } catch (err) {
+        if (err.message.indexOf(' is an invalid value for the setting ') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
     it('should be able to set language', function () {
       let tmp = new SteamSettings()
       testData = tmp.set(testData, 'language', 'czech')
@@ -194,15 +208,16 @@ describe('SteamSettings', function () {
       testData.Registry.HKCU.Software.Valve.Steam.AlreadyRetriedOfflineMode.should.equal('1')
     })
 
-    it('should throw an error when given invalid arguments', function () {
+    it('should be able to set lastInstallFolderIndex', function () {
       let tmp = new SteamSettings()
-      try {
-        testData = tmp.set(testData, 'language', 'Batman')
-      } catch (err) {
-        if (err.message.indexOf(' is an invalid value for the setting ') === -1) {
-          throw new Error(err)
-        }
-      }
+      testData = tmp.set(testData, 'lastInstallFolderIndex', '1')
+      testData.UserLocalConfigStore.LastInstallFolderIndex.should.equal('1')
+    })
+
+    it('should be able to set personaStateDesired', function () {
+      let tmp = new SteamSettings()
+      testData = tmp.set(testData, 'personaStateDesired', '6')
+      testData.UserLocalConfigStore.friends.PersonaStateDesired.should.equal('6')
     })
   })
 })

@@ -57,6 +57,30 @@ describe('SteamPaths', function () {
   })
 
   describe('#rootPath', function () {
+    it('should throw an error for an invalid arg to set', function setRootPathThrows () {
+      try {
+        paths.rootPath = path.join(paths.rootPath, 'Batman')
+
+        throw new Error('did not fail')
+      } catch (err) {
+        if (err.message.indexOf('is an invalid root path because it does not exist') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should throw an error for an empty arg to set', function setRootPathThrows () {
+      try {
+        paths.rootPath = ''
+
+        throw new Error('did not fail')
+      } catch (err) {
+        if (err.message.indexOf('is an invalid root path') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
     it('should get the rootPath', function getRootPath () {
       paths.rootPath.should.equal(pathTo)
     })
@@ -65,19 +89,21 @@ describe('SteamPaths', function () {
       paths.rootPath = home
       paths.rootPath.should.equal(home)
     })
+  })
 
-    it('should throw an error for an invalid arg to set', function setRootPathThrows () {
+  describe('#id64', function () {
+    it('should throw an error for an invalid arg to set', function setId64Throws () {
       try {
-        paths.rootPath = pathTo
+        paths.id64 = {id64: id64}
+
+        throw new Error('Did not fail')
       } catch (err) {
-        if (err.message.indexOf('is an invalid root path') === -1) {
+        if (err.message.indexOf('is an invalid id64') === -1) {
           throw new Error(err)
         }
       }
     })
-  })
 
-  describe('#id64', function () {
     it('should get the id64', function getId64 () {
       paths.id64.should.equal(id64)
     })
@@ -86,19 +112,21 @@ describe('SteamPaths', function () {
       paths.id64 = '420'
       paths.id64.should.equal('420')
     })
+  })
 
-    it('should throw an error for an invalid arg to set', function setId64Throws () {
+  describe('#accountId', function () {
+    it('should throw an error for an invalid arg to set', function setAccountIdThrows () {
       try {
-        paths.id64 = {id64: id64}
+        paths.accountId = {accountId: accountId}
+
+        throw new Error('Did not fail')
       } catch (err) {
-        if (err.message.indexOf('is an invalid id64') === -1) {
+        if (err.message.indexOf('is an invalid accountId') === -1) {
           throw new Error(err)
         }
       }
     })
-  })
 
-  describe('#accountId', function () {
     it('should get the accountId', function getAccountId () {
       paths.accountId.should.equal(accountId)
     })
@@ -106,16 +134,6 @@ describe('SteamPaths', function () {
     it('should set the accountId', function setAccountId () {
       paths.accountId = '420'
       paths.accountId.should.equal('420')
-    })
-
-    it('should throw an error for an invalid arg to set', function setAccountIdThrows () {
-      try {
-        paths.accountId = {accountId: accountId}
-      } catch (err) {
-        if (err.message.indexOf('is an invalid accountId') === -1) {
-          throw new Error(err)
-        }
-      }
     })
   })
 
@@ -137,14 +155,23 @@ describe('SteamPaths', function () {
   })
 
   describe('#app', function () {
-    it('should get the path to an app', function getApp () {
-      paths.app('420').should.be.a('string')
-      paths.app('8675309').should.be.a('string')
+    it('should throw an error for an empty appid arg', function getAppThrowsEmpty () {
+      try {
+        paths.app('')
+
+        throw new Error('Did not fail')
+      } catch (err) {
+        if (err.message.indexOf('Need an appid to get the path to an app') === -1) {
+          throw new Error(err)
+        }
+      }
     })
 
     it('should throw an error for a nonexistent app', function getAppThrowsNoApp () {
       try {
         paths.app('223')
+
+        throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf('App file') !== -1 && err.message.indexOf('appmanifest_223.acf does not exist') === -1) {
           throw new Error(err)
@@ -155,11 +182,18 @@ describe('SteamPaths', function () {
     it('should throw an error for a nonexistent library', function getAppThrowsNoLib () {
       try {
         paths.app('420', '/Batman')
+
+        throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf('does not exist. If it is on an external drive make sure it is properly plugged in and mounted and try again') === -1) {
           throw new Error(err)
         }
       }
+    })
+
+    it('should get the path to an app', function getApp () {
+      paths.app('420').should.be.a('string')
+      paths.app('8675309').should.be.a('string')
     })
   })
 
@@ -172,12 +206,6 @@ describe('SteamPaths', function () {
   describe('#config', function () {
     it('should get the path to config.vdf', function getConfig () {
       paths.config.should.be.a('string')
-    })
-  })
-
-  describe('#steamapps', function () {
-    it('should get the path to a Steam Library Folder\'s steamapps folder', function getSteamapps () {
-      paths.steamapps().should.be.a('string').and.equal(path.join(pathTo, 'steamapps'))
     })
   })
 
@@ -220,6 +248,150 @@ describe('SteamPaths', function () {
   describe('#skins', function () {
     it('should get the path to skins', function getSkins () {
       paths.skins.should.be.a('string')
+    })
+  })
+
+  describe('#steamapps', function () {
+    it('should throw an error for a nonexistent library', function getAppThrowsEmpty () {
+      try {
+        paths.steamapps(path.join(paths.rootPath, 'Batman'))
+
+        throw new Error('Did not fail')
+      } catch (err) {
+        if (err.message.indexOf('/steamapps\' folder does not exist') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should get the path to a steamapps folder', function getSteamapps () {
+      paths.steamapps().should.be.a('string').and.equal(path.join(pathTo, 'steamapps'))
+    })
+  })
+
+  describe('#all, #app, #appinfo, #config, #libraryfolders, #localconfig, #loginusers, #registry, #sharedconfig, #shortcuts, #skins, #steamapps', function () {
+    it('should throw when rootPath is set to a folder that is not a Steam installation', function () {
+      paths.rootPath = __dirname
+
+      try {
+        let val = paths.all
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.app('420')
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.appinfo
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.config
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.libraryfolders
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.localconfig
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.loginusers
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.registry
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.sharedconfig
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.shortcuts
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.skins
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
+
+      try {
+        let val = paths.steamapps()
+
+        throw new Error(`Did not fail: ${val}`)
+      } catch (err) {
+        if (err.message.indexOf(' does not exist.') === -1) {
+          throw new Error(err)
+        }
+      }
     })
   })
 })
