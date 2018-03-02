@@ -33,12 +33,17 @@ describe('SteamConfig', function () {
       this.pending = true
     }
 
-    it('should detect & set the default path if autoSet is true', function detectRootAndAutoSet () {
+    it('should detect & set the path', function detectRootAndAutoSet () {
       steam.detectRoot(true)
-      should.not.equal(steam.rootPath, null)
+      if (steam.rootPath === null) {
+        console.error('Error: Steam has not been installed on this machine; cannot test detectRoot.')
+        this.pending = true
+      }
+      steam.rootPath.should.not.equal(null)
+      steam.paths.rootPath.should.equal(steam.detectRoot())
     })
 
-    it('should detect & return the default path if autoSet is false', function detectRootAndReturn () {
+    it('should detect & return the path', function detectRootAndReturn () {
       let detected = steam.detectRoot()
       should.not.equal(detected, null)
     })
@@ -118,6 +123,8 @@ describe('SteamConfig', function () {
       try {
         let user = steam.detectUser()
         user.should.not.exist()
+
+        throw new Error('Did not fail.')
       } catch (err) {
         if (err.message.indexOf('Could not detect user.') === -1) {
           throw new Error(err)
@@ -147,6 +154,8 @@ describe('SteamConfig', function () {
       try {
         await steam.load(steam.paths.loginusers)
         steam.setUser('Batman')
+
+        throw new Error('Did not fail.')
       } catch (err) {
         if (err.message.indexOf('is an invalid user identifier.') === -1) {
           throw new Error(err)
@@ -253,6 +262,8 @@ describe('SteamConfig', function () {
     it('should throw an error for an unknown entry', async function () {
       try {
         await steam.save('something')
+
+        throw new Error('Did not fail.')
       } catch (err) {
         if (err.message.indexOf('Cannot save unknown entry') === -1) {
           throw new Error(err)
@@ -341,7 +352,7 @@ describe('SteamConfig', function () {
 
         throw new Error('Did not fail.')
       } catch (err) {
-        if (err.message.indexOf(' does not exist.') === -1) {
+        if (err.message.indexOf('does not exist.') === -1) {
           throw new Error(err)
         }
       }

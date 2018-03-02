@@ -40,9 +40,23 @@ describe('simple-vdf2', function () {
       testThis.should.throw()
     })
 
+    it.skip('should throw an error for invalid brackets', function parseThrowsForBrackets () {
+      try {
+        VDF.parse('"Hello"\n{\t\t\n}')
+
+        throw new Error('Did not fail.')
+      } catch (err) {
+        if (err.message.indexOf('VDF.parse: expected bracket on line') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
     it('should throw an error for invalid syntax', function parseThrowsForInvalid () {
       try {
-        VDF.parse('Hi\n{\t\t}')
+        VDF.parse('Hi {\t\t}}')
+
+        throw new Error('Did not fail.')
       } catch (err) {
         if (err.message.indexOf('VDF.parse: invalid syntax on line') === -1) {
           throw new Error(err)
