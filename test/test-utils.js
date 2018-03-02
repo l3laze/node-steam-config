@@ -3,7 +3,6 @@
 
 const path = require('path')
 const chai = require('chai')
-const chaiAsPromised = require('chai-as-promised')
 
 const requestWithCache = require('../lib/steamdata-utils.js').requestWithCache
 const requestTags = require('../lib/steamdata-utils.js').requestTags
@@ -11,7 +10,6 @@ const requestGenres = require('../lib/steamdata-utils.js').requestGenres
 const requestOwnedApps = require('../lib/steamdata-utils.js').requestOwnedApps
 const getAccountIdFromId64 = require('../lib/steamdata-utils.js').getAccountIdFromId64
 
-chai.use(chaiAsPromised)
 chai.should()
 
 describe('getAccountIdFromId64', function () {

@@ -165,7 +165,20 @@ describe('SteamSettings', function () {
   })
 
   describe('#set', function () {
-    it('should throw an error when given invalid arguments', function () {
+    it('should throw an error when given no path and no path exists', function () {
+      let tmp = new SteamSettings()
+      try {
+        testData = tmp.set(testData, 'stateFlags', '0')
+
+        throw new Error('did not fail')
+      } catch (err) {
+        if (err.message.indexOf('A path to set a value for must be provided.') === -1) {
+          throw new Error(err)
+        }
+      }
+    })
+
+    it('should throw an error when given an invalid value', function () {
       let tmp = new SteamSettings()
       try {
         testData = tmp.set(testData, 'language', 'Batman', undefined)
@@ -218,6 +231,12 @@ describe('SteamSettings', function () {
       let tmp = new SteamSettings()
       testData = tmp.set(testData, 'personaStateDesired', '6')
       testData.UserLocalConfigStore.friends.PersonaStateDesired.should.equal('6')
+    })
+
+    it('should be able to set stateFlags for an app', function () {
+      let tmp = new SteamSettings()
+      testData = tmp.set(testData, 'stateFlags', '6', 'AppState.StateFlags')
+      testData.AppState.StateFlags.should.equal('6')
     })
   })
 })
