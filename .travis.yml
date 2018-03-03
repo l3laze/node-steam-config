@@ -27,3 +27,6 @@ after_success:
   - yarn textcov
   - yarn codecov && yarn codacy
   - rm -rf ./coverage && rm -f ./coverage.lcov
+
+notifications:
+  email: false
