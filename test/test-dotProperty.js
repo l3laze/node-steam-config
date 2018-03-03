@@ -39,9 +39,9 @@ describe('dotProperty', function () {
       val.should.equal(true)
     })
 
-    it('should return undefined for an invalid path or prop argument', function getInvalid () {
+    it('should return null for an invalid path or prop argument', function getInvalid () {
       let val = dotProperty.get(testData, 'Something.Something.DarkSide.isMagic')
-      should.equal(val, undefined)
+      should.equal(val, null)
     })
   })
 
