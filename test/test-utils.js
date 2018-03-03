@@ -108,11 +108,13 @@ describe('requestGenres', function () {
     this.timeout(3000)
     let genres = await requestGenres('218620', true, {enabled: true, folder: path.join(__dirname, 'data')})
     genres.should.be.a('array')
+    genres[ 0 ].should.have.property('appid').equal('218620')
   })
 
   it('should get the genres for a valid argument from the cache', async function requestGenresInvalid () {
     this.timeout(3000)
     let genres = await requestGenres('218620', false, {enabled: true, folder: path.join(__dirname, 'data')})
     genres.should.be.a('array')
+    genres[ 0 ].should.have.property('appid').equal('218620')
   })
 })
