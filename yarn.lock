@@ -2729,9 +2729,9 @@ stealthy-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
 
-steam-dummy@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.3.tgz#c9e2870735ef492884f1bba222af15798cdd813a"
+steam-dummy@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.4.tgz#b2a7d46365996d5e6838db9302172c9c50e91941"
 
 string-width@^1.0.1:
   version "1.0.2"
