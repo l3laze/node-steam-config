@@ -5,25 +5,45 @@ const path = require('path')
 const SteamConfig = require('../lib/index.js')
 const Dummy = require('steam-dummy')
 const should = require('chai').should() // eslint-disable-line no-unused-vars
+const arch = require('os').arch()
+const platform = require('os').platform()
+const {Registry} = require('rage-edit')
 
-let dumbass = new Dummy()
-
+let dummy = new Dummy()
+let pathTo
 let steam
-let pathTo = path.join(__dirname, 'Dummy')
+let winreg
 
-try {
-  dumbass.makeDummy(pathTo, true)
-  console.info(`Dummy data created - ${dumbass.created.length}`)
-} catch (err) {
-  throw new Error(err)
+if (process.env.CI === true) {
+  if (platform === 'darwin') {
+    pathTo = path.join(require('os').homedir(), 'Library', 'Application Support', 'Steam')
+  } else if (platform === 'linux') {
+    pathTo = path.join(require('os').homedir(), '.steam')
+  } else if (platform === 'win32') {
+    if (arch === 'ia32') {
+      pathTo = path.join('C:', 'Program Files', 'Steam')
+    } else if (arch === 'ia64') {
+      pathTo = path.join('C:', 'Program Files (x86)', 'Steam')
+    }
+  }
+} else {
+  pathTo = path.join(__dirname, 'Dummy')
+}
+
+if (platform === 'win32') {
+  winreg = new Registry('HKCU\\Software\\Valve\\Steam')
 }
 
 describe('SteamConfig', function () {
-  beforeEach(function () {
+  beforeEach(async function () {
+    await dummy.makeDummy(pathTo, true)
     steam = new SteamConfig()
   })
 
   afterEach(function () {
+    if (platform === 'win32') {
+      winreg.delete(new Registry('HKCU\\Software\\Valve'))
+    }
     steam = undefined
   })
 
@@ -103,7 +123,8 @@ describe('SteamConfig', function () {
 })
 
 describe('SteamConfig', function () {
-  beforeEach(function () {
+  beforeEach(async function () {
+    await dummy.makeDummy(pathTo, true)
     steam = new SteamConfig()
     steam.setRoot(pathTo)
     steam.currentUser = {
@@ -115,6 +136,9 @@ describe('SteamConfig', function () {
   })
 
   afterEach(function () {
+    if (platform === 'win32') {
+      winreg.delete(new Registry('HKCU\\Software\\Valve'))
+    }
     steam = undefined
   })
 
@@ -229,7 +253,16 @@ describe('SteamConfig', function () {
 
     it('should load a steamapps folder as requested', async function loadSteamApps () {
       await steam.load(steam.paths.steamapps())
-      steam.steamapps.should.be.a('array')
+      steam.steamapps.should.be.a('array').and.have.property('length').equal(2)
+    })
+
+    it('should append another steamapps folder as requested', async function loadMoreSteamApps () {
+      await steam.load([steam.paths.steamapps(), steam.paths.libraryfolders])
+      steam.appendToApps = true
+      steam.libraryfolders.LibraryFolders[ '1' ] = path.join(pathTo, 'External Steam Library Folder')
+      await steam.load(steam.paths.steamapps(steam.libraryfolders.LibraryFolders[ '1' ]))
+      await steam.load(steam.paths.steamapps())
+      steam.steamapps.should.be.a('array').and.have.property('length').equal(4)
     })
 
     it('should load registry as requested', async function loadRegistry () {

@@ -31,12 +31,12 @@
     "mocha": "^5.0.0",
     "nyc": "^11.4.1",
     "standard": "^10.0.3",
-    "steam-dummy": "^0.0.4"
+    "steam-dummy": "^0.0.5"
   },
   "scripts": {
     "lint": "yarn standard",
     "test": "mocha",
-    "nyc": "nyc mocha",
+    "nyc": "nyc --produce-source-map mocha",
     "htmlcov": "nyc report --reporter=html",
     "textcov": "nyc report --reporter=text-lcov > coverage.lcov",
     "coverage": "yarn htmlcov && yarn textcov",
@@ -45,5 +45,8 @@
     "codacy": "cat coverage.lcov | codacy-coverage",
     "jsdock": "jsdock build && jsdock publish",
     "docs": "jsdoc -c .jsdoc.json -R README.md -t ./node_modules/ink-docstrap/template"
+  },
+  "nyc": {
+    "sourceMap": true
   }
 }

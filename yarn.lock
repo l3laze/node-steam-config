@@ -2729,9 +2729,12 @@ stealthy-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
 
-steam-dummy@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.4.tgz#b2a7d46365996d5e6838db9302172c9c50e91941"
+steam-dummy@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.5.tgz#77527588f17978762007b42308c0b51d7f353fe9"
+  dependencies:
+    fs-extra "^5.0.0"
+    rage-edit "^1.0.2"
 
 string-width@^1.0.1:
   version "1.0.2"
