@@ -343,7 +343,7 @@ describe('SteamPaths', function () {
         let val = paths.registry
 
         if (val === 'winreg') {
-          throw new Error('Throwing winreg folder does not exist so this test will pass on Windows.')
+          throw new Error('Throwing winreg folder does not exist. So this test will pass on Windows.')
         }
 
         throw new Error(`Did not fail: ${val}`)

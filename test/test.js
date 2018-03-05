@@ -41,8 +41,8 @@ describe('SteamConfig', function () {
   })
 
   afterEach(function () {
-    if (platform === 'win32') {
-      winreg.delete(new Registry('HKCU\\Software', 'Valve'))
+    if (platform === 'win32' && winreg.has('HKCU\\Software', 'Valve')) {
+      winreg.delete('HKCU\\Software', 'Valve')
     }
     steam = undefined
   })
@@ -136,8 +136,8 @@ describe('SteamConfig', function () {
   })
 
   afterEach(function () {
-    if (platform === 'win32') {
-      winreg.delete(new Registry('HKCU\\Software', 'Valve'))
+    if (platform === 'win32' && winreg.has('HKCU\\Software', 'Valve')) {
+      winreg.delete('HKCU\\Software', 'Valve')
     }
     steam = undefined
   })
