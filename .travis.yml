@@ -21,6 +21,9 @@ before_install:
 
 script:
   - yarn lint
+  - ls
+  - ls test
+  - ls test/Dummy
   - yarn nyc
 
 after_success:
