@@ -387,6 +387,10 @@ check-error@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/check-error/-/check-error-1.0.2.tgz#574d312edd88bb5dd8912e9286dd6c0aed4aac82"
 
+chmodr@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/chmodr/-/chmodr-1.0.2.tgz#04662b932d0f02ec66deaa2b0ea42811968e3eb9"
+
 circular-json@^0.3.1:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.3.tgz#815c99ea84f6809529d2f45791bdf82711352d66"
@@ -2729,10 +2733,11 @@ stealthy-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
 
-steam-dummy@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.5.tgz#77527588f17978762007b42308c0b51d7f353fe9"
+steam-dummy@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.6.tgz#c22ceb8d63a16bf2cdfa35f6ac5cd5ba4182f4d2"
   dependencies:
+    chmodr "^1.0.2"
     fs-extra "^5.0.0"
     rage-edit "^1.0.2"
 
