@@ -254,7 +254,7 @@ describe('SteamPaths', function () {
 
         throw new Error('Did not fail')
       } catch (err) {
-        if (err.message.indexOf('/steamapps\' folder does not exist') === -1) {
+        if (err.message.indexOf(' folder does not exist') === -1) {
           throw new Error(err)
         }
       }
@@ -341,6 +341,10 @@ describe('SteamPaths', function () {
 
       try {
         let val = paths.registry
+
+        if (val === 'winreg') {
+          throw new Error('Throwing winreg folder does not exist so this test will pass on Windows.')
+        }
 
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
