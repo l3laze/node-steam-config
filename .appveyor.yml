@@ -32,8 +32,8 @@ build:
 build_script:
   - yarn lint
   - dir
-  - dir /test
-  - dir /test/Dummy
+  - dir \test
+  - dir \test\Dummy
   - yarn nyc
 
 # After successful build
