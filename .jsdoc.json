@@ -6,7 +6,8 @@
         "include": [
           "./lib/index.js",
           "./lib/steam-paths.js",
-          "./lib/steamdata-utils.js"
+          "./lib/steamdata-utils.js",
+          "./lib/steam-settings.js"
         ]
     },
     "sourceType": "module",

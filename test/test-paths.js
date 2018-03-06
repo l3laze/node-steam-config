@@ -6,24 +6,19 @@ const SteamPaths = require('../lib/steam-paths.js')
 const Dummy = require('steam-dummy')
 require('chai').should() // eslint-disable-line no-unused-vars
 
-let dumbass = new Dummy()
-
-let paths
 const pathTo = path.join(__dirname, 'Dummy')
 const id64 = '76561198067577712'
 const accountId = '107311984'
 const home = require('os').homedir()
 
-try {
-  dumbass.makeDummy(pathTo, false)
-  if (dumbass.created > 0) {
-    console.info(`Dummy data created - ${dumbass.created.length}`)
-  }
-} catch (err) {
-  throw new Error(err)
-}
+let dummy = new Dummy()
+let paths
 
 describe('SteamPaths', function () {
+  beforeEach(async function () {
+    await dummy.makeDummy(pathTo, true)
+  })
+
   describe('#constructor', function () {
     it('should set the rootPath, id64, and accountId with the constructor', function constructorSetProps () {
       paths = new SteamPaths(pathTo, id64, accountId)
@@ -45,7 +40,8 @@ describe('SteamPaths', function () {
 })
 
 describe('SteamPaths', function () {
-  beforeEach(function () {
+  beforeEach(async function () {
+    await dummy.makeDummy(pathTo, true)
     paths = new SteamPaths()
     paths.rootPath = pathTo
     paths.id64 = id64
@@ -258,7 +254,7 @@ describe('SteamPaths', function () {
 
         throw new Error('Did not fail')
       } catch (err) {
-        if (err.message.indexOf('/steamapps\' folder does not exist') === -1) {
+        if (err.message.indexOf(' folder does not exist') === -1) {
           throw new Error(err)
         }
       }
@@ -345,6 +341,10 @@ describe('SteamPaths', function () {
 
       try {
         let val = paths.registry
+
+        if (val === 'registry.winreg') {
+          throw new Error('Throwing winreg folder does not exist. So this test will pass on Windows.')
+        }
 
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {

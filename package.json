@@ -18,35 +18,35 @@
     "fs-extra": "^5.0.0",
     "node-fetch": "^2.0.0",
     "rage-edit": "^1.0.2",
-    "simple-vdf2": "^1.1.1"
+    "simple-vdf2": "^1.2.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "cli": "^1.0.1",
     "codacy-coverage": "^2.1.0",
     "codecov": "^3.0.0",
-    "coveralls": "^3.0.0",
     "ink-docstrap": "^1.3.2",
     "jsdoc": "^3.5.5",
     "jsdock": "^1.0.4",
-    "markdox": "^0.1.10",
     "mocha": "^5.0.0",
     "nyc": "^11.4.1",
     "standard": "^10.0.3",
-    "steam-dummy": "^0.0.3"
+    "steam-dummy": "^0.0.7-rc1"
   },
   "scripts": {
     "lint": "yarn standard",
     "test": "mocha",
-    "nyc-test": "nyc mocha",
+    "nyc": "nyc --produce-source-map mocha",
     "htmlcov": "nyc report --reporter=html",
     "textcov": "nyc report --reporter=text-lcov > coverage.lcov",
     "coverage": "yarn htmlcov && yarn textcov",
-    "tandc": "yarn nyc-test && yarn coverage",
+    "tandc": "yarn nyc && yarn coverage",
     "codecov": "codecov",
     "codacy": "cat coverage.lcov | codacy-coverage",
-    "jsdoc": "jsdoc -c .jsdoc.json -R README.md",
     "jsdock": "jsdock build && jsdock publish",
-    "jsdoc-strap": "jsdoc -c .jsdoc.json -R README.md -t ./node_modules/ink-docstrap/template"
+    "docs": "jsdoc -c .jsdoc.json -R README.md -t ./node_modules/ink-docstrap/template"
+  },
+  "nyc": {
+    "sourceMap": true
   }
 }
