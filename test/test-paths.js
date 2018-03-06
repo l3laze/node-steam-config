@@ -10,6 +10,7 @@ const pathTo = path.join(__dirname, 'Dummy')
 const id64 = '76561198067577712'
 const accountId = '107311984'
 const home = require('os').homedir()
+const platform = require('os').platform()
 
 let dummy = new Dummy()
 let paths
@@ -261,7 +262,13 @@ describe('SteamPaths', function () {
     })
 
     it('should get the path to a steamapps folder', function getSteamapps () {
-      paths.steamapps().should.be.a('string').and.equal(path.join(pathTo, 'steamapps'))
+      let p = paths.steamapps()
+      p.should.be.a('string')
+      if (platform !== 'linux') {
+        p.should.equal(path.join(pathTo, 'steamapps'))
+      } else {
+        p.should.equal(path.join(pathTo, 'steam', 'steamapps'))
+      }
     })
   })
 

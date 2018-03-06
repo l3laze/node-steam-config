@@ -31,7 +31,7 @@
     "mocha": "^5.0.0",
     "nyc": "^11.4.1",
     "standard": "^10.0.3",
-    "steam-dummy": "^0.0.7-rc1"
+    "steam-dummy": "^0.0.7-rc2"
   },
   "scripts": {
     "lint": "yarn standard",
