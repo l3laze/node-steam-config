@@ -4,7 +4,6 @@ language:
 
 os:
   - osx
-  - linux
 
 cache:
   yarn: true

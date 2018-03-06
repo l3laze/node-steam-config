@@ -17,7 +17,7 @@ let winreg
 if (process.env.CI === true) {
   if (platform === 'darwin') {
     pathTo = path.join(require('os').homedir(), 'Library', 'Application Support', 'Steam')
-  } else if (platform === 'linux') {
+  } /* istanbul ignore next */ else if (platform === 'linux') {
     pathTo = path.join(require('os').homedir(), '.steam')
   } else if (platform === 'win32') {
     if (arch === 'ia32') {
