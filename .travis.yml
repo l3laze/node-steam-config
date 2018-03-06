@@ -26,10 +26,12 @@ script:
   - sh travis_fold.sh start TESTING
   - yarn nyc
   - sh travis_fold.sh end
+  - sh travis_fold.sh start AFTER_SCRIPT
+  - sh perms.sh after
+  - sh travis_fold.sh end
 
 after_success:
   - sh travis_fold.sh start COVERAGE
-  - sh perms.sh after
   - yarn textcov
   - yarn codecov && yarn codacy
   - sh travis_fold.sh end
