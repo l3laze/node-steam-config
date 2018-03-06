@@ -4,9 +4,9 @@ stage=$1
 
 # Partially based on https://stackoverflow.com/a/394247/7665043
 
-if [[ "$stage" == 'script' ]]; then
+if [ "$stage" == 'script' ]; then
   unamestr=`uname`
-  if [[ "$unamestr" == 'Linux' ]]; then
+  if [ "$unamestr" == 'Linux' ]; then
     ls -la /home/travis/build/l3laze/node-steam-config/node_modules/steam-dummy/data/Linux
     chmod -R u+rwx /home/travis/build/l3laze/node-steam-config/
   else
