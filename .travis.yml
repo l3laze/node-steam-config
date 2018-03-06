@@ -23,6 +23,7 @@ script:
   - yarn lint
   - unameOut="$(uname -s)";
     if [[ $unameOut == *"Linux"* ]]; then
+        ls /home/travis/build/l3laze/node-steam-config/test ;
         chmod -R ugo+rwx /home/travis/build/l3laze/node-steam-config ;
     fi
   - yarn nyc
