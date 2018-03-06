@@ -2733,9 +2733,9 @@ stealthy-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
 
-steam-dummy@^0.0.7-rc1:
-  version "0.0.7-rc1"
-  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.7-rc1.tgz#dd34fa592571a87fd34d41c64a02622b7a85c900"
+steam-dummy@^0.0.7-rc2:
+  version "0.0.7-rc2"
+  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.7-rc2.tgz#1560094e4e27c75cdad88243853c032982d3c06e"
   dependencies:
     chmodr "^1.0.2"
     fs-extra "^5.0.0"
