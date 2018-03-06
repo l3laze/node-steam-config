@@ -3,6 +3,7 @@ language:
   - version: 8
 
 os:
+  - linux
   - osx
 
 cache:
@@ -20,6 +21,10 @@ before_install:
 
 script:
   - yarn lint
+  - unameOut="$(uname -s)";
+    if [[ $unameOut == *"Linux"* ]]; then
+        chmod -R ugo+rwx /users/travis/build/l3laze/node-steam-config ;
+    fi
   - yarn nyc
 
 after_success:
