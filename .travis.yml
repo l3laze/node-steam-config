@@ -21,7 +21,7 @@ before_install:
 
 script:
   - yarn lint
-  - chmod -r 0777 /
+  - chmod -R 0777 /
   - yarn nyc
 
 after_success:
