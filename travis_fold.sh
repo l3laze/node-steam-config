@@ -10,11 +10,11 @@
 
 TMP=/tmp/.travis_folding
 
-if [[ "$1" == 'start' ]]; then
+if [ "$1" == 'start' ]; then
   tfold start $2
   echo $2
   /bin/echo -n $2 > $TMP
-elif [[ "$1" == 'end' ]]; then
+elif [ "$1" == 'end' ]; then
   tfold end `cat ${TMP}`
 fi
 
