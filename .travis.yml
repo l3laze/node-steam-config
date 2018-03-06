@@ -12,29 +12,20 @@ cache:
     - "node_modules"
 
 before_install:
-  - chmod u+x travis_fold.sh
-  - sh travis_fold.sh start YARN
   - npm i -g yarn
-  - sh travis_fold.sh end
 
 script:
-  - sh travis_fold.sh start SCRIPT
+  - echo -en "travis_fold:start:SCRIPT\r"
   - yarn lint
-  - chmod u+x perms.sh
-  - sh perms.sh script
-  - sh travis_fold.sh end
-  - sh travis_fold.sh start TESTING
   - yarn nyc
-  - sh travis_fold.sh end
-  - sh travis_fold.sh start AFTER_SCRIPT
-  - sh perms.sh after
-  - sh travis_fold.sh end
+  - echo -en "travis_fold:end:SCRIPT\r"
 
 after_success:
-  - sh travis_fold.sh start COVERAGE
+  - echo -en "travis_fold:start:COVERAGE\r"
+  - chmod 755 /Users/travis/build/l3laze/node-steam-config/.nyc_output
   - yarn textcov
   - yarn codecov && yarn codacy
-  - sh travis_fold.sh end
+  - echo -en "travis_fold:end:COVERAGE\r"
 
 notifications:
   email: false
