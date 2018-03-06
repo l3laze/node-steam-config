@@ -1,6 +1,6 @@
-language:
-  - node_js
-  - version: 8
+language: node_js
+
+node_js: "lts/*"
 
 os:
   - linux
@@ -9,23 +9,30 @@ os:
 cache:
   yarn: true
   directories:
-    - home/travis/build/l3laze/node-steam-config/node_modules
-    - Users/travis/build/l3laze/node-steam-config/node_modules
+    - "node_modules"
 
 before_install:
-  - nvm install --lts
+  - chmod u+x travis_fold.sh
+  - sh travis_fold.sh start YARN
   - npm i -g yarn
+  - sh travis_fold.sh end
 
 script:
+  - sh travis_fold.sh start SCRIPT
   - yarn lint
   - chmod u+x perms.sh
   - sh perms.sh script
+  - sh travis_fold.sh end
+  - sh travis_fold.sh start TESTING
   - yarn nyc
+  - sh travis_fold.sh end
 
 after_success:
+  - sh travis_fold.sh start COVERAGE
   - sh perms.sh after
   - yarn textcov
   - yarn codecov && yarn codacy
+  - sh travis_fold.sh end
 
 notifications:
   email: false
