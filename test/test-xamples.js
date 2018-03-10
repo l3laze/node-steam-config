@@ -5,11 +5,9 @@ const path = require('path')
 const should = require('chai').should() // eslint-disable-line no-unused-vars
 const spawnSync = require('child_process').spawnSync
 const Dummy = require('steam-dummy')
-const SteamConfig = require('./../lib/index.js')
 
 const dummy = new Dummy()
 const pathTo = path.join(__dirname, 'Dummy')
-let steam = new SteamConfig()
 
 describe('./examples', function () {
   beforeEach(async function () {
@@ -34,27 +32,13 @@ describe('./examples', function () {
 
   describe('switch_user.js', function () {
     it('should switch between 2 users automatically', async function () {
-      steam.detectRoot(true)
-
-      await steam.load(steam.paths.registry)
-
-      let user = steam.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser
-
       const res1 = spawnSync('node ./examples/switch_user.js', [], { encoding: 'utf-8', shell: true })
 
       res1.stdout.should.include('Switched to ')
 
-      await steam.load(steam.paths.registry)
-
-      steam.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser.should.not.equal(user)
-
       const res2 = spawnSync('node ./examples/switch_user.js', [], { encoding: 'utf-8', shell: true })
 
       res2.stdout.should.include('Switched to ')
-
-      await steam.load(steam.paths.registry)
-
-      steam.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser.should.equal(user)
     })
   })
 
