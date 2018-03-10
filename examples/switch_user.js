@@ -1,6 +1,6 @@
 'use strict'
 
-const SteamConfig = require('../index.js')
+const SteamConfig = require('../lib/index.js')
 const cli = require('cli')
 
 /*

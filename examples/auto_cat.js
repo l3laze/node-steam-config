@@ -2,12 +2,12 @@
 
 // const fs = require('fs')
 // const path = require('path')
-const SteamConfig = require('../index.js')
+const SteamConfig = require('../lib/index.js')
 const path = require('path')
 const cli = require('cli')
 
-const requestOwnedApps = require('../steamdata-utils.js').requestOwnedApps
-const requestTags = require('../steamdata-utils.js').requestTags
+const requestOwnedApps = require('../lib/steamdata-utils.js').requestOwnedApps
+const requestTags = require('../lib/steamdata-utils.js').requestTags
 // const requestGenres = require('../steamdata-utils.js').requestGenres
 
 /*
@@ -40,7 +40,7 @@ async function run () {
     console.info('Trying to find default path to Steam...')
 
     if (!steam.paths.rootPath) {
-      process.error('Couldn\'t find default path to Steam.')
+      process.error('Could not find default path to Steam.')
       process.exit(1)
     }
   }

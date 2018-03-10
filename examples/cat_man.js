@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 const path = require('path')
-const SteamConfig = require('../index.js')
+const SteamConfig = require('../lib/index.js')
 const cli = require('cli')
 
 /*

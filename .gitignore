@@ -22,3 +22,5 @@ docs/
 test/data/
 
 coverage\.lcov
+
+docs\.html

@@ -1,4 +1,4 @@
-const SteamConfig = require('../index.js')
+const SteamConfig = require('../lib/index.js')
 
 let steam = new SteamConfig();
 
