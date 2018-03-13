@@ -42,6 +42,7 @@ describe('SteamPaths', function () {
 
 describe('SteamPaths', function () {
   beforeEach(function (done) {
+    this.timeout(4000)
     dummy.makeDummy(pathTo, true).then(function () {
       paths = new SteamPaths()
       paths.rootPath = pathTo
@@ -363,16 +364,6 @@ describe('SteamPaths', function () {
 
       try {
         let val = paths.sharedconfig
-
-        throw new Error(`Did not fail: ${val}`)
-      } catch (err) {
-        if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
-        }
-      }
-
-      try {
-        let val = paths.shortcuts
 
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
