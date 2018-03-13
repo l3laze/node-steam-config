@@ -2,6 +2,7 @@
 
 const SteamConfig = require('../lib/index.js')
 const cli = require('cli')
+const path = require('path')
 
 /*
  * Slightly increased console width for 'cli' because
