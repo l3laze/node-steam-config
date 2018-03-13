@@ -1,12 +1,41 @@
-const SteamConfig = require('../index.js')
+'use strict'
 
-let steam = new SteamConfig();
+const path = require('path')
+const cli = require('cli')
+const SteamConfig = require('../lib/index.js')
 
-(async function run () {
+/*
+ * Slightly increased console width for 'cli' because
+ *  it defaults to 70/25, which is often too small.
+ */
+cli.width = 80
+cli.option_width = 35
+
+let options = cli.parse({
+  path: ['p', 'Path to Steam installation.', 'path', undefined],
+  user: ['u', 'User to switch to by account name or display name.', 'string', undefined]
+})
+
+let steam = new SteamConfig()
+
+async function run () {
   try {
-    steam.detectRoot(true)
-    await steam.load(steam.paths.loginusers)
-    steam.detectUser(true)
+    if (!options.path) {
+      console.info('Trying to find default path to Steam...')
+      steam.detectRoot(true)
+    } else {
+      steam.setRoot(path.join(options.path))
+    }
+
+    await steam.load([steam.paths.registry, steam.paths.loginusers])
+    if (!options.user) {
+      steam.detectUser(true)
+    } else {
+      steam.setUser(options.user)
+    }
+
+    options.user = steam.currentUser.id64
+
     await steam.load(steam.paths.all.concat([ steam.paths.steamapps() ]))
 
     steam.appendToApps = true
@@ -23,12 +52,16 @@ let steam = new SteamConfig();
     console.info('registry:', steam.registry ? 'exists' : 'nope')
     console.info('skins:', steam.skins.length)
     console.info('steamapps:', steam.steamapps.length)
-    console.info('loginusers:', Object.keys(steam.loginusers).length)
+    console.info('loginusers:', Object.keys(steam.loginusers.users).length)
     console.info('currentUser - localconfig:', steam.loginusers.users[ steam.currentUser.id64 ].localconfig ? 'exists' : 'nope')
     console.info('currentUser - sharedconfig:', steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig ? 'exists' : 'nope')
     console.info('currentUser - shortcuts:', steam.loginusers.users[ steam.currentUser.id64 ].shortcuts ? 'exists' : 'nope')
   } catch (err) {
-    console.error(err)
-    process.exit(1)
+    throw err
   }
-})()
+}
+
+run().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

@@ -31,7 +31,8 @@ build:
 # Run build (tests)
 build_script:
   - yarn lint
-  - yarn nyc
+  - yarn test-examples
+  - yarn nyct
 
 # After successful build
 on_success:

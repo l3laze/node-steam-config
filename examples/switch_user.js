@@ -1,7 +1,8 @@
 'use strict'
 
-const SteamConfig = require('../index.js')
+const SteamConfig = require('../lib/index.js')
 const cli = require('cli')
+const path = require('path')
 
 /*
  * Slightly increased console width for 'cli' because
@@ -21,6 +22,8 @@ async function run () {
   if (options.path === null) {
     console.info('Trying to find default path to Steam...')
     steam.detectRoot(true)
+  } else {
+    steam.setRoot(path.join(options.path))
   }
 
   await steam.load([steam.paths.registry, steam.paths.loginusers])
@@ -49,9 +52,7 @@ async function run () {
   }
 }
 
-try {
-  run()
-} catch (err) {
+run().catch((err) => {
   console.error(err)
   process.exit(1)
-}
+})

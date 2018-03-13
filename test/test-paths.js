@@ -16,8 +16,8 @@ let dummy = new Dummy()
 let paths
 
 describe('SteamPaths', function () {
-  beforeEach(async function () {
-    await dummy.makeDummy(pathTo, true)
+  beforeEach(function (done) {
+    dummy.makeDummy(pathTo).then(done)
   })
 
   describe('#constructor', function () {
@@ -41,12 +41,14 @@ describe('SteamPaths', function () {
 })
 
 describe('SteamPaths', function () {
-  beforeEach(async function () {
-    await dummy.makeDummy(pathTo, true)
-    paths = new SteamPaths()
-    paths.rootPath = pathTo
-    paths.id64 = id64
-    paths.accountId = accountId
+  beforeEach(function (done) {
+    this.timeout(4000)
+    dummy.makeDummy(pathTo, true).then(function () {
+      paths = new SteamPaths()
+      paths.rootPath = pathTo
+      paths.id64 = id64
+      paths.accountId = accountId
+    }).then(done)
   })
 
   afterEach(function () {
@@ -362,16 +364,6 @@ describe('SteamPaths', function () {
 
       try {
         let val = paths.sharedconfig
-
-        throw new Error(`Did not fail: ${val}`)
-      } catch (err) {
-        if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
-        }
-      }
-
-      try {
-        let val = paths.shortcuts
 
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
