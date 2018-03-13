@@ -22,3 +22,7 @@ docs/
 test/data/
 
 coverage\.lcov
+
+docs\.html
+
+examples/Dummy/

@@ -17,15 +17,13 @@ before_install:
 script:
   - echo -en "travis_fold:start:SCRIPT\r"
   - yarn lint
-  - yarn nyc
-  - echo -en "travis_fold:end:SCRIPT\r"
+  - yarn test-examples
+  - yarn nyct
 
 after_success:
-  - echo -en "travis_fold:start:COVERAGE\r"
-  - chmod 755 /Users/travis/build/l3laze/node-steam-config/.nyc_output
+  - chmod 0755 /home/travis/build/l3laze/node-steam-config/.nyc_output
   - yarn textcov
-  - yarn codecov && yarn codacy
-  - echo -en "travis_fold:end:COVERAGE\r"
+  - yarn codecov
 
 notifications:
   email: false
