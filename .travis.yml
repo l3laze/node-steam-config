@@ -15,6 +15,7 @@ before_install:
   - npm i -g yarn
 
 script:
+  - echo -en "travis_fold:start:SCRIPT\r"
   - yarn lint
   - yarn test-examples
   - yarn nyct
