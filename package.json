@@ -49,6 +49,7 @@
     "jsdock": "jsdock build && jsdock publish",
     "docs": "jsdoc -c .jsdoc.json -R README.md -t ./node_modules/ink-docstrap/template",
 
+    "make-examples-dummy": "node ./examples/example_dummy.js",
     "test-switch": "node ./examples/switch_user.js -p ./examples/Dummy",
     "test-log": "node ./examples/log_info.js -p ./examples/Dummy",
     "test-acata": "node ./examples/auto_cat.js -dbmntg 3 -p ./examples/Dummy",
@@ -58,7 +59,7 @@
     "test-cmano": "node ./examples/cat_man.js -ro -p ./examples/Dummy",
     "test-manb": "node ./examples/manager.js -b -p ./examples/Dummy",
     "test-manr": "node ./examples/manager.js -r -p ./examples/Dummy",
-    "test-examples": "yarn test-switch && yarn test-switch && yarn test-log && yarn test-manb && yarn test-acata && yarn test-acatr && yarn test-cmanb && yarn test-cmanr && yarn test-cmano && yarn test-manr"
+    "test-examples": "yarn make-examples-dummy && yarn test-switch && yarn test-switch && yarn test-log && yarn test-manb && yarn test-acata && yarn test-acatr && yarn test-cmanb && yarn test-cmanr && yarn test-cmano && yarn test-manr"
   },
   "nyc": {
     "sourceMap": true
