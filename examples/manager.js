@@ -1,12 +1,12 @@
 'use strict'
 
 const path = require('path')
-const fs = require('fs')
 const SteamConfig = require('../lib/index.js')
 const cli = require('cli')
 const os = require('os')
-const mkdirp = require('mkdirp')
+const fs = require('fs')
 const dp = require('dot-property')
+const afs = require('../lib/async-fs.js')
 
 /*
  * Slightly increased console width for 'cli' because
@@ -19,44 +19,10 @@ let options = cli.parse({
   path: ['p', 'Path to Steam installation.', 'path', null],
   user: ['u', 'User to switch to by account name or display name.', 'string', null],
   backup: ['b', 'Backup mode', 'boolean', false],
-  restore: ['r', 'Restore mode', 'boolean', false],
-  destination: ['d', 'Data folder for backups', 'path', null]
+  restore: ['r', 'Restore mode', 'boolean', false]
 })
 
 let steam = new SteamConfig()
-
-const readFileAsync = async function (filePath) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        return reject(err)
-      }
-      resolve(data)
-    })
-  })
-}
-
-const writeFileAsync = async function (filePath, data) {
-  return new Promise((resolve, reject) => {
-    fs.writeFile(filePath, data, (err) => {
-      if (err) {
-        return reject(err)
-      }
-      resolve()
-    })
-  })
-}
-
-const mkdirpAsync = async function (filePath) {
-  return new Promise((resolve, reject) => {
-    mkdirp(filePath, undefined, (err) => {
-      if (err) {
-        return reject(err)
-      }
-      resolve()
-    })
-  })
-}
 
 function removeKeys (obj, keys) {
   keys.forEach((k) => {
@@ -83,34 +49,38 @@ function cleanObject (obj, clean) {
 }
 
 async function init () {
-  if (!options.backup && !options.restore) {
-    console.error('No mode set; nothing to do.')
-    process.exit(0)
-  }
+  try {
+    if (!options.backup && !options.restore) {
+      console.error('No mode set; nothing to do.')
+      process.exit(0)
+    }
 
-  if (options.path) {
-    await steam.setRoot(options.path)
-  } else {
-    await steam.detectRoot(true)
-  }
+    if (options.path) {
+      await steam.setRoot(options.path)
+    } else {
+      await steam.detectRoot(true)
+    }
 
-  await steam.load([steam.paths.loginusers, steam.paths.registry])
+    await steam.load([steam.paths.loginusers, steam.paths.registry])
 
-  if (options.user) {
-    await steam.setUser(options.user)
-  } else {
-    await steam.detectUser(true)
-  }
+    if (options.user) {
+      await steam.setUser(options.user)
+    } else {
+      await steam.detectUser(true)
+    }
 
-  let paths = steam.paths.all.filter(p => p.indexOf('appinfo') === -1 && p.indexOf('skins') === -1 && p.indexOf('libraryfolders') === -1)
-  await steam.load(paths)
+    let paths = steam.paths.all.filter(p => p.indexOf('appinfo') === -1 && p.indexOf('skins') === -1 && p.indexOf('libraryfolders') === -1)
+    await steam.load(paths)
 
-  if (!options.destination) {
-    options.destination = path.join(__dirname, 'data')
-  }
+    if (!options.destination) {
+      options.destination = path.join(__dirname, 'data')
+    }
 
-  if (!fs.existsSync(options.destination)) {
-    await mkdirpAsync(options.destination)
+    if (!fs.existsSync(options.destination)) {
+      await afs.mkdirpAsync(options.destination)
+    }
+  } catch (err) {
+    throw err
   }
 }
 
@@ -272,7 +242,7 @@ async function backup () {
       })
     }
 
-    await writeFileAsync(path.join(options.destination, `backup-${tmp.id64}.json`), JSON.stringify(data, null, 2))
+    await afs.writeFileAsync(path.join(options.destination, `backup-${tmp.id64}.json`), JSON.stringify(data, null, 2))
   } catch (err) {
     throw new Error(err)
   }
@@ -285,13 +255,13 @@ async function restore () {
   console.info('Restoring...')
 
   try {
-    data = JSON.parse(await readFileAsync(file))
+    data = JSON.parse(await afs.readFileAsync(file))
 
     steam.config = Object.assign({}, data.config, steam.config)
     steam.loginusers = Object.assign({}, data.loginusers, steam.loginusers)
     steam.registry = Object.assign({}, data.registry, steam.registry)
-    steam.loginusers.users[ data.user.id64 ].sharedconfig = Object.assign({}, data.sharedconfig, steam.loginusers.users[ data.user.id64 ].sharedconfig)
-    steam.loginusers.users[ data.user.id64 ].localconfig = Object.assign({}, data.localconfig, steam.loginusers.users[ data.user.id64 ].localconfig)
+    steam.loginusers.users[ data.user.id64 ].sharedconfig = Object.assign({}, steam.loginusers.users[ data.user.id64 ].sharedconfig, data.sharedconfig)
+    steam.loginusers.users[ data.user.id64 ].localconfig = Object.assign({}, steam.loginusers.users[ data.user.id64 ].localconfig, data.localconfig)
   } catch (err) {
     throw new Error(err)
   }
@@ -300,24 +270,26 @@ async function restore () {
 }
 
 async function run () {
-  await init()
+  try {
+    await init()
 
-  console.info('User:', steam.currentUser.id64)
+    console.info('User:', steam.currentUser.id64)
 
-  if (options.backup) {
-    await backup()
-  }
+    if (options.backup) {
+      await backup()
+    }
 
-  if (options.restore) {
-    await restore()
+    if (options.restore) {
+      await restore()
+    }
+  } catch (err) {
+    throw err
   }
 
   console.info('Finished')
 }
 
-try {
-  run()
-} catch (err) {
+run().catch((err) => {
   console.error(err)
   process.exit(1)
-}
+})

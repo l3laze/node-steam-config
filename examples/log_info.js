@@ -23,7 +23,7 @@ let steam = new SteamConfig();
     console.info('registry:', steam.registry ? 'exists' : 'nope')
     console.info('skins:', steam.skins.length)
     console.info('steamapps:', steam.steamapps.length)
-    console.info('loginusers:', Object.keys(steam.loginusers).length)
+    console.info('loginusers:', Object.keys(steam.loginusers.users).length)
     console.info('currentUser - localconfig:', steam.loginusers.users[ steam.currentUser.id64 ].localconfig ? 'exists' : 'nope')
     console.info('currentUser - sharedconfig:', steam.loginusers.users[ steam.currentUser.id64 ].sharedconfig ? 'exists' : 'nope')
     console.info('currentUser - shortcuts:', steam.loginusers.users[ steam.currentUser.id64 ].shortcuts ? 'exists' : 'nope')
@@ -31,4 +31,7 @@ let steam = new SteamConfig();
     console.error(err)
     process.exit(1)
   }
-})()
+})().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
