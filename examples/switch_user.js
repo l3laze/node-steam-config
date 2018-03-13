@@ -22,7 +22,7 @@ async function run () {
     console.info('Trying to find default path to Steam...')
     steam.detectRoot(true)
   } else {
-    steam.setRoot(options.path)
+    steam.setRoot(path.join(options.path))
   }
 
   await steam.load([steam.paths.registry, steam.paths.loginusers])

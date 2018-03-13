@@ -157,7 +157,7 @@ async function run () {
       steam.detectRoot(true)
       options.path = steam.paths.rootPath
     } else {
-      steam.setRoot(options.path)
+      steam.setRoot(path.join(options.path))
     }
 
     await steam.load([steam.paths.registry, steam.paths.loginusers])
