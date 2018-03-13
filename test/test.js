@@ -36,6 +36,7 @@ if (platform === 'win32') {
 
 describe('SteamConfig', function () {
   beforeEach(async function () {
+    this.timeout(4000)
     await dummy.makeDummy(pathTo, true)
     steam = new SteamConfig()
   })
@@ -124,6 +125,7 @@ describe('SteamConfig', function () {
 
 describe('SteamConfig', function () {
   beforeEach(async function () {
+    this.timeout(4000)
     await dummy.makeDummy(pathTo, true)
     steam = new SteamConfig()
     steam.setRoot(pathTo)
