@@ -33,7 +33,7 @@
     "jsdock": "^1.0.4",
     "mocha": "^5.0.0",
     "nyc": "^11.4.1",
-    "standard": "^10.0.3",
+    "standard": "^11.0.0",
     "steam-dummy": "^0.0.7-rc3"
   },
   "scripts": {
