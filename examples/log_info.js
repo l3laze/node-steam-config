@@ -12,7 +12,7 @@ cli.width = 80
 cli.option_width = 35
 
 let options = cli.parse({
-  path: ['p', 'Path to Steam installation.', 'path', undefined],
+  steam: ['s', 'Path to Steam installation.', 'path', undefined],
   user: ['u', 'User to switch to by account name or display name.', 'string', undefined]
 })
 
@@ -20,11 +20,11 @@ let steam = new SteamConfig()
 
 async function run () {
   try {
-    if (!options.path) {
+    if (!options.steam) {
       console.info('Trying to find default path to Steam...')
       steam.detectRoot(true)
     } else {
-      steam.setRoot(path.join(options.path))
+      steam.setRoot(path.join(options.steam))
     }
 
     await steam.load([steam.paths.registry, steam.paths.loginusers])

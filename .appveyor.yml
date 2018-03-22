@@ -31,7 +31,10 @@ build:
 # Run build (tests)
 build_script:
   - yarn lint
+  - yarn docs-prep
   - yarn test-examples
+  - yarn nyc-patch
+  - yarn nyc --version
   - yarn nyct
 
 # After successful build
@@ -40,4 +43,5 @@ on_success:
   - yarn codecov
 
 environment:
-  nodejs_version: 8
+  matrix:
+  - nodejs_version: 8

@@ -1,38 +1,35 @@
 {
-    "plugins": [
-      "plugins/markdown"
-    ],
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc", "closure"]
+    },
+    "sourceType": "module",
     "source": {
         "include": [
+          "./package.json",
+          "./README.md",
           "./lib/index.js",
           "./lib/steam-paths.js",
           "./lib/steamdata-utils.js",
           "./lib/steam-settings.js"
         ]
     },
-    "sourceType": "module",
-    "tags": {
-        "allowUnknownTags": true,
-        "dictionaries": ["jsdoc", "closure"]
-    },
+    "plugins": [
+      "plugins/markdown"
+    ],
     "templates": {
+        "referenceTitle": "SteamConfig API Reference",
+        "disableSort": true,
         "monospaceLinks": true,
         "default": {
           "includeDate": false,
           "outputSourceFiles": false
-        },
-        "includeDate": false,
-        "navType": "vertical",
-        "linenums": true,
-        "collapseSymbols": true,
-        "inverseNav": true,
-        "includeSource": false
+        }
     },
     "opts": {
-      "destination": "./docs",
+      "template": "./jsdoc-template-master",
+      "destination": "./docs/",
       "encoding": "utf8",
-      "recurse": false,
-      "sort": false,
-      "access": "all"
+      "recurse": false
     }
 }

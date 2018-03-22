@@ -16,7 +16,7 @@ cli.width = 80
 cli.option_width = 35
 
 let options = cli.parse({
-  path: ['p', 'Path to Steam installation.', 'path', null],
+  steam: ['s', 'Path to Steam installation.', 'path', null],
   user: ['u', 'User to switch to by account name or display name.', 'string', null],
   backup: ['b', 'Backup mode', 'boolean', false],
   restore: ['r', 'Restore mode', 'boolean', false]
@@ -55,8 +55,8 @@ async function init () {
       process.exit(0)
     }
 
-    if (options.path) {
-      await steam.setRoot(path.join(options.path))
+    if (options.steam) {
+      await steam.setRoot(path.join(options.steam))
     } else {
       await steam.detectRoot(true)
     }
@@ -244,7 +244,7 @@ async function backup () {
 
     await afs.writeFileAsync(path.join(options.destination, `backup-${tmp.id64}.json`), JSON.stringify(data, null, 2))
   } catch (err) {
-    throw new Error(err)
+    throw err
   }
 }
 
@@ -263,7 +263,7 @@ async function restore () {
     steam.loginusers.users[ data.user.id64 ].sharedconfig = Object.assign({}, steam.loginusers.users[ data.user.id64 ].sharedconfig, data.sharedconfig)
     steam.loginusers.users[ data.user.id64 ].localconfig = Object.assign({}, steam.loginusers.users[ data.user.id64 ].localconfig, data.localconfig)
   } catch (err) {
-    throw new Error(err)
+    throw err
   }
 
   await steam.save([steam.paths.config, steam.paths.loginusers, steam.paths.registry, steam.paths.sharedconfig, steam.paths.localconfig])
