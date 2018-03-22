@@ -15,7 +15,7 @@ cli.width = 80
 cli.option_width = 35
 
 let options = cli.parse({
-  path: ['p', 'Path to Steam installation.', 'path', undefined],
+  steam: ['s', 'Path to Steam installation.', 'path', undefined],
   user: ['u', 'User to auto-categorize games for.', 'string', undefined],
   backup: ['b', 'Backup categories', 'boolean', false],
   restore: ['r', 'Restore categories', 'boolean', false],
@@ -102,11 +102,11 @@ async function run () {
       return console.info(`No mode set. Nothing to do!`)
     }
 
-    if (!options.path) {
+    if (!options.steam) {
       steam.detectRoot(true)
-      options.path = steam.paths.rootPath
+      options.steam = steam.paths.rootPath
     } else {
-      steam.setRoot(path.join(options.path))
+      steam.setRoot(path.join(options.steam))
     }
 
     await steam.load([steam.paths.registry, steam.paths.loginusers])

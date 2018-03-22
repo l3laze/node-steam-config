@@ -1,9 +1,11 @@
 # node-steam-config
 
-[![Travis-CI Build Status](https://travis-ci.org/l3laze/node-steam-config.svg?branch=master)](https://travis-ci.org/l3laze/node-steam-config?branch=master)  [![Codecov branch](https://img.shields.io/codecov/c/github/l3laze/node-steam-config.svg)](https://codecov.io/gh/l3laze/node-steam-config/list/master/) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/6ce28f60d6e64da8bd2c36782fd57973)](https://www.codacy.com/app/l3laze/node-steam-config)
+[![Travis-CI Build Status](https://travis-ci.org/l3laze/node-steam-config.svg?branch=master)](https://travis-ci.org/l3laze/node-steam-config?branch=master) [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/mhpi0l2hog0lbmuw/branch/master?svg=true)](https://ci.appveyor.com/project/l3laze/node-steam-config/branch/master)
 
-[![Dependencies](https://img.shields.io/david/expressjs/express.svg)](https://github.com/l3laze/node-steam-config) [![Dev Dependencies](https://img.shields.io/david/dev/expressjs/express.svg)](https://github.com/l3laze/node-steam-config) [![Peer Dependencies](https://img.shields.io/david/peer/webcomponents/generator-element.svg)](https://github.com/l3laze/node-steam-config)
+[![Codecov branch](https://img.shields.io/codecov/c/github/l3laze/node-steam-config/master.svg)](https://codecov.io/gh/l3laze/node-steam-config/list/master) [![Codacy branch grade](https://img.shields.io/codacy/grade/6ce28f60d6e64da8bd2c36782fd57973/master.svg)](https://app.codacy.com/app/l3laze/node-steam-config/dashboard)
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/l3laze/node-steam-config/master/LICENSE.md)
+[![Known Vulnerabilities](https://snyk.io/test/github/l3laze/node-steam-config/badge.svg?targetFile=package.json)](https://snyk.io/test/github/l3laze/node-steam-config?targetFile=package.json)
+
+[![Dependencies](https://img.shields.io/david/l3laze/node-steam-config.svg)](https://github.com/l3laze/node-steam-config/issues) [![Dev Dependencies](https://img.shields.io/david/dev/l3laze/node-steam-config.svg)](https://github.com/l3laze/node-steam-config) [![Peer Dependencies](https://img.shields.io/david/peer/l3laze/node-steam-config.svg)](https://github.com/l3laze/node-steam-config)
 
 [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)

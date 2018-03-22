@@ -26,3 +26,5 @@ coverage\.lcov
 docs\.html
 
 examples/Dummy/
+
+jsdoc-template-master/

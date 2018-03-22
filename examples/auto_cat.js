@@ -17,10 +17,10 @@ cli.width = 80
 cli.option_width = 35
 
 let options = cli.parse({
-  path: ['p', 'Path to Steam installation.', 'path', undefined],
+  steam: ['s', 'Path to Steam installation.', 'path', undefined],
   user: ['u', 'User to auto-categorize games for.', 'string', undefined],
   dev: ['d', 'Add name of developer as a category', 'boolean', false],
-  pub: ['b', 'Add name of publisher as a category', 'boolean', false],
+  pub: ['p', 'Add name of publisher as a category', 'boolean', false],
   meta: ['m', 'Add metacritic score as a category', 'boolean', false],
   noMeta: ['n', 'Add games without a metacritic score to a "No Metacritic" category', 'boolean', false],
   tags: ['t', 'Categorize by popular tags', 'boolean', false],
@@ -153,11 +153,11 @@ function tagEm (apps, owned, tags, options) {
 
 async function run () {
   try {
-    if (!options.path) {
+    if (!options.steam) {
       steam.detectRoot(true)
-      options.path = steam.paths.rootPath
+      options.steam = steam.paths.rootPath
     } else {
-      steam.setRoot(path.join(options.path))
+      steam.setRoot(path.join(options.steam))
     }
 
     await steam.load([steam.paths.registry, steam.paths.loginusers])

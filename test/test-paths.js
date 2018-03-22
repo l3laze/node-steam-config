@@ -16,8 +16,12 @@ let dummy = new Dummy()
 let paths
 
 describe('SteamPaths', function () {
-  beforeEach(function (done) {
-    dummy.makeDummy(pathTo).then(done)
+  this.timeout(4000)
+
+  beforeEach(async function () {
+    await dummy.makeDummy(pathTo, true).catch((err) => {
+      throw err
+    })
   })
 
   describe('#constructor', function () {
@@ -41,18 +45,16 @@ describe('SteamPaths', function () {
 })
 
 describe('SteamPaths', function () {
-  beforeEach(function (done) {
-    this.timeout(4000)
-    dummy.makeDummy(pathTo, true).then(function () {
-      paths = new SteamPaths()
-      paths.rootPath = pathTo
-      paths.id64 = id64
-      paths.accountId = accountId
-    }).then(done)
-  })
+  this.timeout(4000)
 
-  afterEach(function () {
-    paths = undefined
+  beforeEach(async function () {
+    await dummy.makeDummy(pathTo, true).then(() => {}).catch((err) => {
+      throw err
+    })
+    paths = new SteamPaths()
+    paths.rootPath = pathTo
+    paths.id64 = id64
+    paths.accountId = accountId
   })
 
   describe('#rootPath', function () {
@@ -63,7 +65,7 @@ describe('SteamPaths', function () {
         throw new Error('did not fail')
       } catch (err) {
         if (err.message.indexOf('is an invalid root path because it does not exist') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -75,7 +77,7 @@ describe('SteamPaths', function () {
         throw new Error('did not fail')
       } catch (err) {
         if (err.message.indexOf('is an invalid root path') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -98,7 +100,7 @@ describe('SteamPaths', function () {
         throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf('is an invalid id64') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -121,7 +123,7 @@ describe('SteamPaths', function () {
         throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf('is an invalid accountId') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -161,7 +163,7 @@ describe('SteamPaths', function () {
         throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf('Need an appid to get the path to an app') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -173,7 +175,7 @@ describe('SteamPaths', function () {
         throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf('App file') !== -1 && err.message.indexOf('appmanifest_223.acf does not exist') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -185,7 +187,7 @@ describe('SteamPaths', function () {
         throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf('does not exist. If it is on an external drive make sure it is properly plugged in and mounted and try again') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -258,7 +260,7 @@ describe('SteamPaths', function () {
         throw new Error('Did not fail')
       } catch (err) {
         if (err.message.indexOf(' folder does not exist') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
@@ -284,7 +286,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -294,7 +296,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -304,7 +306,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -314,7 +316,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -324,7 +326,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -334,7 +336,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -344,7 +346,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -358,7 +360,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -368,7 +370,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -378,7 +380,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
 
@@ -388,7 +390,7 @@ describe('SteamPaths', function () {
         throw new Error(`Did not fail: ${val}`)
       } catch (err) {
         if (err.message.indexOf(' does not exist.') === -1) {
-          throw new Error(err)
+          throw err
         }
       }
     })
