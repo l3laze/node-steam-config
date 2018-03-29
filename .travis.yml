@@ -1,0 +1,30 @@
+language: node_js
+
+node_js: "lts/*"
+
+os:
+  - linux
+  - osx
+
+cache:
+  yarn: true
+  directories:
+    - "node_modules"
+
+before_install:
+  - npm i -g yarn
+
+script:
+  - yarn docs-prep
+  - yarn lint
+  #- yarn test-examples
+  - yarn test-mul-nr
+  - yarn nyct
+
+after_success:
+  - chmod 0755 /home/travis/build/l3laze/node-steam-config/.nyc_output
+  - yarn textcov
+  - yarn codecov
+
+notifications:
+  email: false

@@ -1,0 +1,14 @@
+
+\.DS_Store
+
+\.nyc_output/
+
+coverage\.lcov
+
+node_modules/
+
+yarn-error\.log
+
+test/Dummy/
+
+coverage/

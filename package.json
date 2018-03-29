@@ -1,0 +1,63 @@
+{
+  "name": "steamconfig",
+  "version": "0.0.2",
+  "main": "lib/index.js",
+  "author": "Tom <l3l_aze@yahoo.com>",
+  "copyright": "Copyright © 2017 ${author}",
+  "description": "Library to help read/modify/write the Steam Client's configuration.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+github.com/l3laze/node-steam-config.git"
+  },
+  "dependencies": {
+    "bytebuffer": "^5.0.1",
+    "cuint": "^0.2.2",
+    "dot-property": "^0.0.1",
+    "fast-xml-parser": "^3.3.4",
+    "fs-extra": "^5.0.0",
+    "node-fetch": "^2.1.1",
+    "rage-edit": "^1.0.2",
+    "simple-vdf2": "^1.2.1"
+  },
+  "devDependencies": {
+    "7zip-bin": "^3.1.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "cli": "^1.0.1",
+    "codecov": "^3.0.0",
+    "jsdoc": "^3.5.5",
+    "mocha": "^5.0.4",
+    "nyc": "^11.6.0",
+    "shelljs": "^0.8.1",
+    "standard": "^11.0.1",
+    "steam-dummy": "^0.0.7-rc6"
+  },
+  "scripts": {
+    "lint": "yarn standard --ignore *.js",
+    "test": "yarn mocha ./test/paths.test.js ./test/index.test.js ./test/utils.test.js",
+    "test-all": "standard --ignore *.js && yarn test",
+    "test-mul-nr": "node yarn-run-multi -s yarn -a \"mocha -g @notreq\" -t 10",
+    "nyct": "nyc mocha ./test/paths.test.js ./test/index.test.js ./test/utils.test.js",
+    "htmlcov": "nyc report --reporter=html",
+    "textcov": "nyc report --reporter=text-lcov > coverage.lcov",
+    "coverage": "yarn htmlcov && yarn textcov",
+    "codecov": "codecov",
+    "docs-prep": "node ./install-jsdoc-braintree.js",
+    "docs": "jsdoc -c .jsdoc.json -R README.md",
+    "make-examples-dummy": "node ./examples/example_dummy.js",
+    "test-switch": "node ./examples/switch_user.js -s ./examples/Dummy",
+    "test-log": "node ./examples/log_info.js -s ./examples/Dummy",
+    "test-acata": "node ./examples/auto_cat.js -dmnptg 3 -s ./examples/Dummy",
+    "test-acatr": "node ./examples/auto_cat.js -dmnptg 3 -r -s ./examples/Dummy",
+    "test-cmanb": "node ./examples/cat_man.js -b -s ./examples/Dummy",
+    "test-cmanr": "node ./examples/cat_man.js -r -s ./examples/Dummy",
+    "test-cmano": "node ./examples/cat_man.js -ro -s ./examples/Dummy",
+    "test-manb": "node ./examples/manager.js -b -s ./examples/Dummy",
+    "test-manr": "node ./examples/manager.js -r -s ./examples/Dummy",
+    "test-examples": "yarn make-examples-dummy && yarn test-switch && yarn test-switch && yarn test-log && yarn test-manb && yarn test-acata && yarn test-acatr && yarn test-cmanb && yarn test-cmanr && yarn test-cmano && yarn test-manr"
+  },
+  "nyc": {
+    "sourceMap": true
+  }
+}
