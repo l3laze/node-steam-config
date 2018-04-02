@@ -1,3 +1,8 @@
+# Build with NodeJS v# using architecture-specific instalallations
+environment:
+  matrix:
+  - nodejs_version: 8
+
 # Build using both 32-bit and 64-bit Windows.
 platform:
   - x64
@@ -9,7 +14,7 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node $env:nodejs_version $env:Platform
   - npm i -g npm
   - ps: Write-Host "Installing Yarn 1.5.1..."
   - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/yarnpkg/yarn/releases/download/v1.5.1/yarn-1.5.1.msi', "$env:temp\yarn-1.5.1.msi")
@@ -34,13 +39,10 @@ build_script:
   - yarn docs-prep
   #- yarn test-examples
   - yarn test-mul-nr
+  - yarn test-examples
   - yarn nyct
 
 # After successful build
 on_success:
   - yarn textcov
   - yarn codecov
-
-environment:
-  matrix:
-  - nodejs_version: 8

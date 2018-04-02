@@ -19,6 +19,7 @@ script:
   - yarn lint
   #- yarn test-examples
   - yarn test-mul-nr
+  - yarn test-examples
   - yarn nyct
 
 after_success:

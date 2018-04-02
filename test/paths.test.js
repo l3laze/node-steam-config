@@ -3,17 +3,33 @@
 
 const path = require('path')
 const expect = require('chai').expect
+const makeDummy = require('steam-dummy')
+const steamPaths = require('./../lib/paths.js')
 
-const pathTo = path.join(__dirname, 'Dummy')
 const id64 = '76561198067577712'
 const accountID = '107311984'
 const platform = require('os').platform()
 
-const makeDummy = require('steam-dummy')
-const steamPaths = require('./../lib/paths.js')
+let pathTo
+
+if (typeof process.env.CI !== 'undefined' || process.env.SCTRP === true) { // Test Real Paths
+  if (platform === 'darwin') {
+    pathTo = path.join(require('os').homedir(), 'Library', 'Application Support', 'Steam')
+  } else if (platform === 'linux') {
+    pathTo = path.join(require('os').homedir(), '.steam')
+  } else if (platform === 'win32') {
+    if (!/64/.test(process.env.PROCESSOR_ARCHITECTURE)) {
+      pathTo = path.join('C:', 'Program Files', 'Steam') // 32-bit Windows
+    } else {
+      pathTo = path.join('C:', 'Program Files (x86)', 'Steam')
+    }
+  }
+} else {
+  pathTo = path.join(__dirname, 'Dummy')
+}
 
 steamPaths.id64 = id64
-steamPaths.account = accountID
+steamPaths.accountId = accountID
 steamPaths.root = pathTo
 
 describe('Module paths @notreq', function pathsDescriptor () {
@@ -30,7 +46,7 @@ describe('Module paths @notreq', function pathsDescriptor () {
   it('should have a lot of "properties"', function hasALotOfProps () {
     expect(steamPaths).to.have.property('root')
     expect(steamPaths).to.have.property('id64')
-    expect(steamPaths).to.have.property('account')
+    expect(steamPaths).to.have.property('accountId')
     expect(steamPaths).to.have.property('all')
     expect(steamPaths).to.have.property('appinfo')
     expect(steamPaths).to.have.property('config')

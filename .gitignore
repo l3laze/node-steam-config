@@ -12,3 +12,9 @@ yarn-error\.log
 test/Dummy/
 
 coverage/
+
+test/cache/
+
+examples/Dummy/
+
+examples/data/
