@@ -26,8 +26,6 @@ async function run () {
     await steam.setRoot(options.steam)
   }
 
-  console.info(options.steam, steam.paths.registry)
-
   await steam.load(steam.paths.registry, steam.paths.loginusers)
 
   let userKeys = Object.keys(steam.loginusers.users)

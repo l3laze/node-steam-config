@@ -4,7 +4,7 @@
 const chai = require('chai')
 const path = require('path')
 // const fetch = require('node-fetch')
-const steamUtils = require('./../lib/steam-utils.js')
+const steamUtils = require('./../lib/steamUtils.js')
 
 const expect = chai.expect
 

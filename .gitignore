@@ -18,3 +18,7 @@ test/cache/
 examples/Dummy/
 
 examples/data/
+
+docs/
+
+jsdoc-template-master/

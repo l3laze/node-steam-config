@@ -1,33 +1,31 @@
 {
     "tags": {
         "allowUnknownTags": true,
-        "dictionaries": ["jsdoc", "closure"]
+        "dictionaries": ["jsdoc"]
     },
-    "sourceType": "module",
     "source": {
         "include": [
           "./package.json",
           "./README.md",
           "./lib/index.js",
-          "./lib/steam-paths.js",
-          "./lib/steamdata-utils.js",
-          "./lib/steam-settings.js"
+          "./lib/steamPaths.js",
+          "./lib/steamUtils.js"
         ]
     },
     "plugins": [
       "plugins/markdown"
     ],
     "templates": {
-        "referenceTitle": "SteamConfig API Reference",
+        "referenceTitle": "SteamConfig API",
         "disableSort": true,
         "monospaceLinks": true,
         "default": {
           "includeDate": false,
           "outputSourceFiles": false
-        }
+        },
+        "theme": "cyborg"
     },
     "opts": {
-      "template": "./jsdoc-template-master",
       "destination": "./docs/",
       "encoding": "utf8",
       "recurse": false
