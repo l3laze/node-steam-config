@@ -1,5 +1,15 @@
 /**
- * @author Tom <l3l&#95;aze&#64;yahoo&#46;com>
+ * @module SteamConfig
+ * @property {boolean} append - Append loaded apps to this.steamapps if true, or overwrite it if false.
+ * @property {Object} paths - An instance of the SteamPaths class.
+ *
+ * @property {string} appinfo - Value of Binary VDF file appinfo.vdf.
+ * @property {string} config - Value of Text VDF file config.vdf.
+ * @property {string} libraryfolders - Value of Text VDF file libraryfolders.vdf.
+ * @property {string} localconfig - Value of the user-specific Text VDF file localconfig.vdf.
+ * @property {string} loginusers - Value of Text VDF file loginusers.vdf.
+ * @property {Array} skins - Array of names of skin folders as strings.
+ * @property {Array} apps - Array of appmanifest_#.acf (Text VDF) file(s) loaded from Steam Library Folder(s).
  */
 'use strict'
 
@@ -14,19 +24,7 @@ const {Registry} = require('rage-edit')
 const platform = require('os').platform()
 const aidFromID64 = require('./steamUtils.js').getAccountIdFromId64
 let winreg
-/**
- * @constructor
- * @property {boolean} append - Append loaded apps to this.steamapps if true, or overwrite it if false.
- * @property {Object} paths - An instance of the SteamPaths class.
- *
- * @property {string} appinfo - Value of Binary VDF file appinfo.vdf.
- * @property {string} config - Value of Text VDF file config.vdf.
- * @property {string} libraryfolders - Value of Text VDF file libraryfolders.vdf.
- * @property {string} localconfig - Value of the user-specific Text VDF file localconfig.vdf.
- * @property {string} loginusers - Value of Text VDF file loginusers.vdf.
- * @property {Array} skins - Array of names of skin folders as strings.
- * @property {Array} apps - Array of appmanifest_#.acf (Text VDF) file(s) loaded from Steam Library Folder(s).
- */
+
 function SteamConfig () {
   this.append = true
   this.paths = require('./steamPaths.js')
@@ -89,7 +87,7 @@ function cleanObject (obj, clean) {
 }
 
 function afterLoad (name, data) {
-  const cleaned = require('./clean-steam.js')
+  const cleaned = require('./cleanSteam.js')
 
   if (/^(config|localconfig|registry|sharedconfig)/.test(name)) {
     return cleanObject(data, cleaned[ name ])
@@ -145,6 +143,14 @@ async function loadWinReg () {
   }}}}}}
 }
 
+/**
+ * @description Attempt to find the user `identifier`.
+ * @module SteamConfig
+ * @method findUser
+ * @async
+ * @param {String} identifier - The identifier to use to find the user. Can be Steam ID64, Steam3::account ID, persona name, or account name.
+ * @returns {Object} - An object containing `{id64: #, accountId: #}` if the user is found, or an empty object if not.
+ */
 SteamConfig.prototype.findUser = async function findUser (identifier) {
   const users = this.loginusers.users
   const user = Object.keys(users).filter((u) => {
@@ -163,12 +169,11 @@ SteamConfig.prototype.findUser = async function findUser (identifier) {
     return {}
   }
 }
+
 /**
- * Load Steam configuration data files by path and store the data in it's place on SteamConfig.
- *  The internal function beforeLoad is used to organize the entries to ensure proper load order.
- *  The internal function afterLoad is run on each file after it's been loaded to automatically
- *    handle cleaning some of the data such as the useless values in `libraryfolders.vdf` and `loginusers.vdf`.
- * @method
+ * @description Load Steam configuration data files by path and store the data in it's place on SteamConfig. The internal function beforeLoad is used to organize the entries to ensure proper load order. The internal function afterLoad is run on each file after it's been loaded to automatically handle cleaning some of the data such as the useless values in `libraryfolders.vdf` and `loginusers.vdf`.
+ * @module SteamConfig
+ * @method load
  * @async
  * @param {Array} files - A string for a single file/path, or an array for a collection of files/paths.
  * @throws {Error} - If entries is an invalid arg (non-String & non-Array), or any of the entries are not a valid file/path as per SteamPaths.
@@ -205,8 +210,9 @@ SteamConfig.prototype.load = async function steamConfigLoad (...files) {
 }
 
 /**
- * Save Steam configuration data files by path.
- * @method
+ * @description Save Steam configuration data files by path.
+ * @module SteamConfig
+ * @method save
  * @async
  * @param {Array} files - A string for a single file/path, or an array for a collection of files/paths.
  * @throws {Error} - If entries is an invalid arg (non-String & non-Array), or any of the entries are not a valid file/path as per SteamPaths.
@@ -246,9 +252,11 @@ SteamConfig.prototype.save = async function steamConfigSave (...files) {
 }
 
 /**
- * Attempt to detect the root installation path based on platform-specific default installation locations, or the value SteamPath from the registry on Windows. Will also set the path if autoSet is true.
- * @method
- * @param {boolean} auto=false - Whether to automatically set the root path; if false the detected path will be returned instead of setting it.
+ * @description Attempt to detect the root installation path based on platform-specific default installation locations, or the value SteamPath from the registry on Windows. Will also set the path if autoSet is true.
+ * @module SteamConfig
+ * @method detectRoot
+ * @async
+ * @param {boolean} auto = false - Whether to automatically set the root path; if false the detected path will be returned instead of setting it.
  * @throws {Error} - If the current OS is not supported.
  * @returns {Path} - If autoSet is false: if a path is detected it is returned, otherwise returns null if the default path is not found or does not exist.
  */
@@ -283,9 +291,11 @@ SteamConfig.prototype.detectRoot = async function detectRoot (auto = false) {
 }
 
 /**
- * Attempt to detect the user of the Steam installation from (in order) the active user, the mostrecent user, or the only user.
- * @method
- * @param {boolean} auto=false - Whether to automatically set the detected user as the active user of SteamConfig; if false the detected user will be returned instead of setting it.
+ * @description Attempt to detect the user of the Steam installation from (in order) the active user, the mostrecent user, or the only user.
+ * @module SteamConfig
+ * @method detectUser
+ * @async
+ * @param {boolean} auto = false - Whether to automatically set the detected user as the active user of SteamConfig; if false the detected user will be returned instead of setting it.
  * @throws {Error} - If the current OS is not supported.
  * @returns {String} - If auto is false: if a user is detected it is returned, otherwise returns null.
  */
@@ -325,8 +335,10 @@ SteamConfig.prototype.detectUser = async function detectUser (auto = false) {
 }
 
 /**
- * Attempt to set the root path of the Steam installation.
- * @method
+ * @description Attempt to set the root path of the Steam installation.
+ * @module SteamConfig
+ * @method setRoot
+ * @async
  * @param {Path} to - The path to set as the root.
  * @throws {Error} - If to is an invalid path, or if the path is not a valid Steam installation.
  */
@@ -341,8 +353,10 @@ SteamConfig.prototype.setRoot = async function setRoot (to) {
 }
 
 /**
- * Attempt to set the root path of the Steam installation.
- * @method
+ * @description Attempt to set the root path of the Steam installation.
+ * @module SteamConfig
+ * @method setUser
+ * @async
  * @param {Path} to - The path to set as the root.
  * @throws {Error} - If to is an invalid path, or if the path is not a valid Steam installation.
  */

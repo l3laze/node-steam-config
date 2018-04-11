@@ -15,7 +15,6 @@ before_install:
   - npm i -g yarn
 
 script:
-  - yarn docs-prep
   - yarn lint
   #- yarn test-examples
   - yarn test-mul-nr

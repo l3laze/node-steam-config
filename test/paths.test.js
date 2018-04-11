@@ -4,7 +4,7 @@
 const path = require('path')
 const expect = require('chai').expect
 const makeDummy = require('steam-dummy')
-const steamPaths = require('./../lib/steamPaths.js')
+const steamPaths = require('./../src/steamPaths.js')
 
 const id64 = '76561198067577712'
 const accountID = '107311984'

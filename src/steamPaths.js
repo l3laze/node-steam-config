@@ -1,13 +1,6 @@
 /**
- * @author Tom <l3l&#95;aze&#64;yahoo&#46;com>
- */
-'use strict'
-
-const path = require('path')
-const platform = require('os').platform()
-
-/**
- * @class
+ * @module SteamPaths
+ *
  * @property {Path} root - The root of the Steam installation.
  * @property {Number} id64 - The current user's Steam ID64.
  * @property {Number} accountId - The current user's Steam3::account ID
@@ -22,6 +15,10 @@ const platform = require('os').platform()
  * @property {Object} shortcuts - Path to the user-specific file shortcuts.vdf.
  * @property {Object} skins - Path to the skins folder.
  */
+'use strict'
+
+const path = require('path')
+const platform = require('os').platform()
 
 function SteamPaths () {
   let rootPath
@@ -146,8 +143,10 @@ function SteamPaths () {
   }
 
   /**
-   * @method
-   * @param {String} id - The Steam appid of the app to load.
+   * @description Get the path to a Steam app.
+   * @module SteamPaths
+   * @method app
+   * @param {string} id - The Steam appid of the app to load.
    * @param {Path} library - The path to the Steam Library Folder to load the app from.  If undefined it will use the default folder.
    * @return {Path} - The path to the app
    */
@@ -164,7 +163,9 @@ function SteamPaths () {
   }
 
   /**
-  * @method
+  * @description Get the paths to all of the Steam apps in a Steam Library Folder.
+  * @module SteamPaths
+  * @method steamapps
   * @param {Path} library - The path to the Steam Library Folder to load. If undefined it will use the default folder.
   * @return {Path} - The path to the apps that the Steam Library Folder contains.
   */

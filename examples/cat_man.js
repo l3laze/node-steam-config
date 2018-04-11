@@ -4,8 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const cli = require('cli')
 const dp = require('dot-property')
-const steam = require('../lib/index.js')
-const afs = require('../lib/asyncLib.js')
+const steam = require('../src/index.js')
+const afs = require('../src/asyncLib.js')
 
 /*
  * Slightly increased console width for 'cli' because

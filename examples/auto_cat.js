@@ -5,8 +5,8 @@
 const path = require('path')
 const cli = require('cli')
 const dp = require('dot-property')
-const steam = require('../lib/index.js')
-const steamUtils = require('../lib/steamUtils.js')
+const steam = require('../src/index.js')
+const steamUtils = require('../src/steamUtils.js')
 // const requestGenres = require('../steamdata-utils.js').requestGenres
 
 /*

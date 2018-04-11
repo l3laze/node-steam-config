@@ -1,3 +1,6 @@
+/**
+ * @module SteamUtils
+ */
 'use strict'
 
 const fs = require('fs')
@@ -7,6 +10,14 @@ const FXP = require('fast-xml-parser')
 const UInt64 = require('cuint').UINT64
 const afs = require('./asyncLib.js')
 
+/**
+ * @description Get the Steam3::account ID from a Steam ID64 value.
+ * @method getAccountIdFromId64
+ * @arg {Number} id64 - The id64 to get the accountId from.
+ * @returns {Number} - The accountId of the id64.
+ * @throws {Error} - If argument `id64` is invalid.
+ * @throws {Error} - To propagate errors
+ */
 function getAccountIdFromId64 (id64) {
   if (typeof id64 !== 'string' || /[^\d]/.test(id64)) {
     throw new Error(`Invalid id64 for getAccountIdFromId64: ${id64} ${typeof id64}. Should be a number as a 'string'.`)
@@ -15,7 +26,19 @@ function getAccountIdFromId64 (id64) {
   return '' + ((new UInt64(id64, 10).toNumber() & 0xFFFFFFFF) >>> 0)
 }
 
-async function requestWithCache (requestFunc, force, cache, extra) {
+/**
+ * @description Request a webpage and optionally cache results.
+ * @method requestWithCache
+ * @async
+ * @arg {Number} id64 - The id64 to get the accountId from.
+ * @arg {Boolean} force - Force to get a fresh copy of the requested data.
+ * @arg {Object} cache - An object of the format {enabled: true|false, folder: path to cache folder, file: path to cache file}
+ * @arg {string} site - The site to request the data from.
+ * @returns {string} - The requested data if found/received.
+ * @throws {Error} - If `requestFunc` is not an async function.
+ * @throws {Error} - To propagate errors
+ */
+async function requestWithCache (requestFunc, force, cache, site) {
   if (requestFunc.constructor.name !== 'AsyncFunction') {
     throw new Error('Invalid requestFunc for requestWithCache -- should be an AsyncFunction.')
   }
@@ -27,8 +50,8 @@ async function requestWithCache (requestFunc, force, cache, extra) {
     if (useCache) {
       data = JSON.parse('' + await afs.readFileAsync(path.join(cache.folder, cache.file)))
     } else {
-      if (typeof extra !== 'undefined') {
-        data = await requestFunc(extra)
+      if (typeof site !== 'undefined') {
+        data = await requestFunc(site)
       } else {
         data = await requestFunc()
       }
@@ -49,6 +72,17 @@ async function requestWithCache (requestFunc, force, cache, extra) {
   return data
 }
 
+/**
+ * @description Request the list of owned apps on Steam for a given Steam ID64.
+ * @method requestOwnedApps
+ * @async
+ * @arg {Number} id64 - The id64 to get the accountId from.
+ * @arg {Boolean} force - Force to get a fresh copy of the requested data.
+ * @arg {Object} cache - An object of the format {enabled: true|false, folder: path to cache folder, file: path to cache file}
+ * @returns {Array} - An array objects, each representing a single owned app for the account `id64`.
+ * @throws {Error} - If argument `id64` is invalid.
+ * @throws {Error} - To propagate errors
+ */
 async function requestOwnedApps (id64, force = false, cache = {enabled: false}) {
   if (!id64 || typeof id64 !== 'string' || /\D/.test(id64)) {
     throw new Error(`Invalid id64 for requestOwnedApps: ${id64} ${typeof id64}. Should be a number as a 'string'.`)
@@ -75,6 +109,15 @@ async function requestOwnedApps (id64, force = false, cache = {enabled: false}) 
   return owned
 }
 
+/**
+ * @description Request the list of popular tags on Steam.
+ * @method requestTags
+ * @async
+ * @arg {Boolean} force - Force to get a fresh copy of the requested data.
+ * @arg {Object} cache - An object of the format {enabled: true|false, folder: path to cache folder, file: path to cache file}
+ * @returns {Array} - An array of key: val pairs of tag names and their ID's.
+ * @throws {Error} - To propagate errors.
+ */
 async function requestTags (/* istanbul ignore next */ force = false, /* istanbul ignore next */ cache = {}) {
   async function reqFunc () {
     let data
@@ -151,6 +194,17 @@ async function reqGenresHelper (appid) {
   return data
 }
 
+/**
+ * @description Request the list of genres for an app on Steam.
+ * @method requestGenres
+ * @async
+ * @arg {Number} appid - The Steam appid of the app to request genres for.
+ * @arg {Boolean} force - Force to get a fresh copy of the requested data.
+ * @arg {Object} cache - An object of the format {enabled: true|false, folder: path to cache folder, file: path to cache file}
+ * @returns {Array} - The genres from the app's Steam store page.
+ * @throws {Error} - If argument `appid` is invalid.
+ * @throws {Error} - To propagate errors
+ */
 async function requestGenres (appid, /* istanbul ignore next */ force = false, /* istanbul ignore next */ cache = {}) {
   if (!appid || typeof appid !== 'string' || /\D/.test(appid)) {
     throw new Error(`Invalid appid for requestGenres: ${typeof appid}. Should be a number as a 'string'.`)

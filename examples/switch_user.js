@@ -1,6 +1,6 @@
 'use strict'
 
-const steam = require('../lib/index.js')
+const steam = require('../src/index.js')
 const cli = require('cli')
 const path = require('path')
 

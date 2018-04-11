@@ -50,9 +50,51 @@ async function unlinkAsync (filePath) {
   })
 }
 
+/* istanbul ignore next */
+async function readdirAsync (filePath) {
+  return new Promise((resolve, reject) => {
+    fs.readdir(filePath, (err, data) => {
+      /* istanbul ignore next */
+      if (err) {
+        return reject(err)
+      }
+      return resolve(data)
+    })
+  })
+}
+
+/* istanbul ignore next */
+async function accessAsync (filePath) {
+  return new Promise((resolve, reject) => {
+    fs.access(filePath, (err, data) => {
+      /* istanbul ignore next */
+      if (err) {
+        return reject(err)
+      }
+      return resolve(data)
+    })
+  })
+}
+
+/* istanbul ignore next */
+async function lstatAsync (filePath) {
+  return new Promise((resolve, reject) => {
+    fs.lstat(filePath, (err, data) => {
+      /* istanbul ignore next */
+      if (err) {
+        return reject(err)
+      }
+      return resolve(data)
+    })
+  })
+}
+
 module.exports = {
   readFileAsync,
   writeFileAsync,
   mkdirpAsync,
-  unlinkAsync
+  readdirAsync,
+  unlinkAsync,
+  accessAsync,
+  lstatAsync
 }

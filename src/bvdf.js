@@ -1,7 +1,5 @@
 'use strict'
 /**
- * @author Tom <l3l&#95;aze&#64;yahoo&#46;com>
- * @file bvdf.js
  * @module bvdf
  */
 

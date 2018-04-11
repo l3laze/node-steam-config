@@ -1,12 +1,12 @@
 'use strict'
 
 const path = require('path')
-const steam = require('../lib/index.js')
+const steam = require('../src/index.js')
 const cli = require('cli')
 const os = require('os')
 const fs = require('fs')
 const dp = require('dot-property')
-const afs = require('../lib/asyncLib.js')
+const afs = require('../src/asyncLib.js')
 
 /*
  * Slightly increased console width for 'cli' because
@@ -94,7 +94,7 @@ function stripLoginUsers (lu) {
 }
 
 async function backup () {
-  const cleaned = require('../lib/clean-steam.js')
+  const cleaned = require('../src/cleanSteam.js')
 
   console.info('Backing up...')
 

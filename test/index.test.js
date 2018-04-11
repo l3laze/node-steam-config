@@ -4,7 +4,7 @@
 const path = require('path')
 const chai = require('chai')
 const makeDummy = require('steam-dummy')
-const steam = require('./../lib/index.js')
+const steam = require('./../src/index.js')
 // const {Registry} = require('rage-edit')
 // const rimraf = require('util').promisify(require('rimraf'))
 
