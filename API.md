@@ -13,6 +13,7 @@
     * [loginusers](#steamconfig-loginusers)
     * [skins](#steamconfig-skins)
     * [apps](#steamconfig-apps)
+    * [original](#steamconfig-original)
   * [Methods](#module-steamconfig-methods)
     * `async` [findUser (identifier)](#steamconfig-finduser)
     * `async` [load (files)](#steamconfig-load)
@@ -71,6 +72,7 @@
 | <a name='steamconfig-loginusers'></a> loginusers | string | Value of Text VDF file loginusers.vdf.
 | <a name='steamconfig-skins'></a> skins | Array | Array of names of skin folders as strings.
 | <a name='steamconfig-apps'></a> apps | Array | Array of appmanifest_#.acf (Text VDF) file(s) loaded from Steam Library Folder(s).
+| <a name='steamconfig-original'></a> original | Object | Settings as loaded from files without being cleaned. To help when restoring data.
 ## ------------
 
 <a name='module-steamconfig-methods'></a>
@@ -129,7 +131,7 @@ Save Steam configuration data files by path.
 <a name='steamconfig-detectroot'></a>
 #### `async`  detectRoot (auto = false) 
 
-Attempt to detect the root installation path based on platform-specific default installation locations, or the value SteamPath from the registry on Windows. Will also set the path if autoSet is true.
+Attempt to detect the root installation path based on platform-specific default installation locations. Will also set the path if autoSet is true.
 > **Arguments**
 
 * `auto` = false *is a* `boolean` - Whether to automatically set the root path; if false the detected path will be returned instead of setting it.

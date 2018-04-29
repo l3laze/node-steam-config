@@ -2771,9 +2771,9 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-steam-dummy@^0.0.7-rc6:
-  version "0.0.7-rc6"
-  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.7-rc6.tgz#843320dcbd36db03605faa4c14b1a5a878d25e34"
+steam-dummy@^0.0.7-rc7:
+  version "0.0.7-rc7"
+  resolved "https://registry.yarnpkg.com/steam-dummy/-/steam-dummy-0.0.7-rc7.tgz#e5f6a973d712937cdbdc75bc4f87506660acb9a4"
   dependencies:
     chmodr "^1.0.2"
     fs-extra "^5.0.0"

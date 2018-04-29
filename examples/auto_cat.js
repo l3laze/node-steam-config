@@ -151,7 +151,7 @@ function tagEm (apps, owned, tags, options) {
 
 async function run () {
   try {
-    if (!options.steam) {
+    if (options.steam === undefined) {
       await steam.detectRoot(true)
       options.steam = steam.paths.rootPath
     } else {
@@ -162,7 +162,7 @@ async function run () {
 
     await steam.load(steam.paths.registry, steam.paths.loginusers)
 
-    if (!options.user) {
+    if (options.user === undefined) {
       await steam.detectUser(true)
       options.user = steam.paths.id64
     } else {

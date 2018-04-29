@@ -18,7 +18,7 @@ let options = cli.parse({
 
 async function run () {
   try {
-    if (!options.steam) {
+    if (options.steam === undefined) {
       console.info('Trying to find default path to Steam...')
 
       await steam.detectRoot(true)
@@ -28,7 +28,7 @@ async function run () {
       await steam.setRoot(options.steam)
     }
 
-    if (!options.user) {
+    if (options.user === undefined) {
       await steam.detectUser(true)
     } else {
       await steam.setUser(options.user)

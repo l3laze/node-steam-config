@@ -91,7 +91,9 @@ async function requestOwnedApps (id64, force = false, cache = {enabled: false}) 
   let rf = async () => {
     let data
 
-    data = await fetch(`https://steamcommunity.com/profiles/${id64}/games/?tab=all&xml=1`)
+    data = await fetch(`https://steamcommunity.com/profiles/${id64}/games/?tab=all&xml=1`, {
+      timeout: 5900
+    })
     data = FXP.parse(await data.text()).gamesList.games.game
     if (typeof data === 'object' && data.constructor.name !== 'Array') {
       data = [data]
@@ -123,7 +125,9 @@ async function requestTags (/* istanbul ignore next */ force = false, /* istanbu
     let data
 
     try {
-      data = await fetch('https://store.steampowered.com/tagdata/populartags/english')
+      data = await fetch('https://store.steampowered.com/tagdata/populartags/english', {
+        timeout: 5900
+      })
       data = await data.text()
       data = JSON.parse('' + data)
     } catch (err) {
@@ -158,11 +162,12 @@ async function reqGenresHelper (appid) {
     let index
     let done = false
 
-    data = await fetch(`http://store.steampowered.com/app/${appid}/`, {
+    data = await fetch(`https://store.steampowered.com/app/${appid}/`, {
       credentials: 'include',
       headers: {
         cookie: 'birthtime=189324001' // 1/1/1976 @ 12:00:01 AM
-      }
+      },
+      timeout: 5900
     })
 
     data = '' + await data.text()
@@ -170,14 +175,14 @@ async function reqGenresHelper (appid) {
     index = data.indexOf('<div class="details_block">')
 
     do {
-      index = data.indexOf('http://store.steampowered.com/genre/', index) // 36 characters
+      index = data.indexOf('https://store.steampowered.com/genre/', index) // 36 characters
 
       if (index === -1) {
         done = true
         break
       }
 
-      index += 36
+      index += 37
 
       genres.push(data.substring(index, data.indexOf('/', index)))
     } while (!done)

@@ -52,8 +52,9 @@ Platform specific packages are optionalDependencies, and may require manual inst
   await steam.detectRoot(true) // Detect & set the root path.
   await steam.load(steam.paths.all.concat(steam.paths.steamapps())) // Load the configuration + installed app data.
 
-  console.info(`${Object.keys(steam.loginusers.users).length} users associated with this Steam installation.`)
-  console.info(`${steam.apps.length} apps installed at default Steam Library Folder`)
+  console.info(`Path: ${steam.paths.root}`)
+  console.info(`There are ${Object.keys(steam.loginusers.users).length} users associated with this Steam installation.`)
+  console.info(`There are ${steam.apps.length} apps installed in the default Steam Library Folder`)
 
 ```
 
@@ -70,25 +71,28 @@ For more check out the [examples](./examples) and the [API documentation](./API.
 **Note**: All testing except detection of the root path (which will try to find a locally-installed Steam client) is done using dummy data by default.
 
 
-Clone the repo, switch into it's directory, and then run
+| Command | Example | Description |
+| ---- | ---- | ---- |
+| test | `yarn test` | Run all of the scripts from {project root}/test once. |
+| test-all | `yarn test-all` | Run the linter, test scripts, and example scripts (using dummy data). |
+| test-all-real | `yarn test-all-real` | Run the linter, test scripts, and example scripts (using both real and dummy data). |
+| test-mul-nr | `yarn test-mul-nr` | Run the test scripts **10 times**, except those that use the internet. |
+| test-examples | `yarn test-examples` | Run the example scripts using dummy data (only on Linux/Mac). |
+| test-examples-real | `yarn test-examples-real` | Run the example scripts using a real Steam installation. |
 
 
-`yarn test`
+----
 
 
-To run all of the tests including those that use the internet. Or instead run
+## Other Commands From `package.json`
 
 
-`yarn test-mul-nr`
-
-
-To run all of the tests, except those that use the internet, 10 times.
-
-
-The example scripts can be tested by running
-
-
-`yarn test-examples`
+| Command | Example | Description |
+| ---- | ---- | ---- |
+| lint | `yarn lint` | Run the [StandardJS](https://standardjs.com/) linter. |
+| nyct | `yarn nyct` | Run the test scripts with coverage using [NYC](https://github.com/istanbuljs/nyc). |
+| htmlcov | `yarn htmlcov` | Create a HTML coverage report from the testing data. |
+| docs | `yarn docs` | Generate API.md from the code documentation. |
 
 
 ----
@@ -96,7 +100,7 @@ The example scripts can be tested by running
 
 ## Contributors
 
-[Owen McDonnell](https://github.com/OwenMcDonnell) of AppVeyor support staff -- bug report, fixes for .appveyor.yml.
+[Owen McDonnell](https://github.com/OwenMcDonnell) of AppVeyor support staff -- bug reports, fixes for .appveyor.yml.
 
 
 ----

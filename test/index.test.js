@@ -217,16 +217,9 @@ describe('Module SteamConfig @notreq', function moduleDescriptor () {
     })
 
     it('should load steamapps as requested', async function loadMoreApps () {
-      let externalLib
+      steam.libraryfolders.LibraryFolders[ '1' ] = path.join(pathTo, 'External Steam Library Folder')
 
-      for (let k of Object.keys(steam.libraryfolders.LibraryFolders)) {
-        if (k !== 'ContentStatsID' && k !== 'TimeNextStatsReport') {
-          steam.libraryfolders.LibraryFolders[ k ] = path.join(pathTo, 'External Steam Library Folder')
-          externalLib = steam.libraryfolders.LibraryFolders[ k ]
-        }
-      }
-
-      await steam.load(steam.paths.steamapps(externalLib))
+      await steam.load(steam.paths.steamapps(steam.libraryfolders.LibraryFolders[ '1' ]))
       expect(steam.apps).to.be.a('array').and.have.property('length').and.equal(4)
 
       await steam.load(steam.paths.steamapps())

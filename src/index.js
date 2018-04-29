@@ -10,6 +10,7 @@
  * @property {string} loginusers - Value of Text VDF file loginusers.vdf.
  * @property {Array} skins - Array of names of skin folders as strings.
  * @property {Array} apps - Array of appmanifest_#.acf (Text VDF) file(s) loaded from Steam Library Folder(s).
+ * @property {Object} original - Settings as loaded from files without being cleaned. To help when restoring data.
  */
 'use strict'
 
@@ -39,6 +40,15 @@ function SteamConfig () {
   this.shortcuts = []
   this.skins = []
   this.apps = []
+  this.original = {
+    config: {},
+    libraryfolders: {},
+    localconfig: {},
+    loginusers: {},
+    registry: {},
+    sharedconfig: {},
+    apps: []
+  }
 
   if (platform === 'win32') {
     winreg = new Registry('HKCU\\Software\\Valve\\Steam')
@@ -178,13 +188,15 @@ SteamConfig.prototype.findUser = async function findUser (identifier) {
  * @param {Array} files - A string for a single file/path, or an array for a collection of files/paths.
  * @throws {Error} - If entries is an invalid arg (non-String & non-Array), or any of the entries are not a valid file/path as per SteamPaths.
  */
-SteamConfig.prototype.load = async function steamConfigLoad (...files) {
+SteamConfig.prototype.load = async function load (...files) {
   try {
     if ((typeof files[ 0 ] === 'object' && files[ 0 ].constructor.name === 'Array') && files.length === 1) {
       files = files[ 0 ]
     }
 
     files = beforeLoad(files)
+
+    let data
 
     for (let f of files) {
       if (typeof f === 'string') { // A single file..
@@ -195,7 +207,9 @@ SteamConfig.prototype.load = async function steamConfigLoad (...files) {
         } else if (/shortcuts/.test(name)) {
           this.shortcuts = await BVDF.parseShortcuts(await al.readFileAsync(f))
         } else if (/(^config$|libraryfolders|localconfig|loginusers|^registry$|sharedconfig)/.test(name)) {
-          this[ name ] = afterLoad(name, await TVDF.parse('' + await al.readFileAsync(f)))
+          data = await TVDF.parse('' + await al.readFileAsync(f))
+          this.original[ name ] = data
+          this[ name ] = afterLoad(name, data)
         } else if (/registry.winreg/.test(f)) {
           this.registry = await loadWinReg()
         }
@@ -205,7 +219,17 @@ SteamConfig.prototype.load = async function steamConfigLoad (...files) {
     }
   } catch (err) {
     /* istanbul ignore next */
-    throw err
+    if (err.code === 'ENOENT') {
+      if (/appinfo|config(\/|\\)config|libraryfolders|localconfig|loginusers|registry|sharedconfig/.test(err.message)) {
+        throw new Error('The Steam client has not been properly initialized; please run Steam and login, exit the client, then try this again.')
+      } else if (err.message.indexOf('shortcuts.vdf') !== -1) {
+        this[ 'shortcuts' ] = {
+          shortcuts: []
+        }
+      } else {
+        throw new Error(err)
+      }
+    }
   }
 }
 
@@ -217,7 +241,7 @@ SteamConfig.prototype.load = async function steamConfigLoad (...files) {
  * @param {Array} files - A string for a single file/path, or an array for a collection of files/paths.
  * @throws {Error} - If entries is an invalid arg (non-String & non-Array), or any of the entries are not a valid file/path as per SteamPaths.
  */
-SteamConfig.prototype.save = async function steamConfigSave (...files) {
+SteamConfig.prototype.save = async function save (...files) {
   try {
     if (typeof files[ 0 ] === 'object' && files[ 0 ].constructor.name === 'Array' && files.length === 1) {
       files = files[ 0 ]
@@ -252,7 +276,7 @@ SteamConfig.prototype.save = async function steamConfigSave (...files) {
 }
 
 /**
- * @description Attempt to detect the root installation path based on platform-specific default installation locations, or the value SteamPath from the registry on Windows. Will also set the path if autoSet is true.
+ * @description Attempt to detect the root installation path based on platform-specific default installation locations. Will also set the path if autoSet is true.
  * @module SteamConfig
  * @method detectRoot
  * @async
@@ -262,10 +286,6 @@ SteamConfig.prototype.save = async function steamConfigSave (...files) {
  */
 SteamConfig.prototype.detectRoot = async function detectRoot (auto = false) {
   let detected
-
-  if (typeof this.registry.Registry === 'undefined') {
-    await this.load(this.paths.registry)
-  }
 
   if (platform === 'darwin') {
     detected = path.join(require('os').homedir(), 'Library', 'Application Support', 'Steam')

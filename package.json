@@ -31,12 +31,13 @@
     "rimraf": "^2.6.2",
     "shelljs": "^0.8.1",
     "standard": "^11.0.1",
-    "steam-dummy": "^0.0.7-rc6"
+    "steam-dummy": "^0.0.7-rc7"
   },
   "scripts": {
     "lint": "yarn standard --ignore *.js",
     "test": "yarn mocha ./test/paths.test.js ./test/index.test.js ./test/utils.test.js",
-    "test-all": "yarn lint && yarn test",
+    "test-all": "yarn lint && yarn test && yarn test-examples",
+    "test-all-real": "yarn test-all && yarn test-examples-real",
     "test-mul-nr": "node yarn-run-multi -s yarn -a \"mocha -g @notreq\" -t 10",
     "nyct": "nyc mocha ./test/paths.test.js ./test/index.test.js ./test/utils.test.js",
     "htmlcov": "nyc report --reporter=html",
@@ -54,7 +55,8 @@
     "test-cmano": "node ./examples/cat_man.js -ro -s ./Dummy",
     "test-manb": "node ./examples/manager.js -b -s ./Dummy",
     "test-manr": "node ./examples/manager.js -r -s ./Dummy",
-    "test-examples": "yarn make-examples-dummy && yarn test-switch && yarn test-switch && yarn test-log && yarn test-manb && yarn test-acata && yarn test-acatr && yarn test-cmanb && yarn test-cmanr && yarn test-cmano && yarn test-manr"
+    "test-examples": "yarn make-examples-dummy && yarn test-switch && yarn test-switch && yarn test-log && yarn test-manb && yarn test-acata && yarn test-acatr && yarn test-cmanb && yarn test-cmanr && yarn test-cmano && yarn test-manr",
+    "test-examples-real": "node ./examples/log_info.js && node ./examples/switch_user.js && node ./examples/switch_user.js && node ./examples/cat_man.js -b && node ./examples/auto_cat.js -dpmntg 2 && node ./examples/cat_man.js -r && node ./examples/auto_cat.js -dpmntg 2 -r && node ./examples/cat_man.js -ro && node ./examples/manager.js -b && node ./examples/manager.js -r && node ./examples/cat_man.js -ro"
   },
   "nyc": {
     "sourceMap": true

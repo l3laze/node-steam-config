@@ -16,8 +16,8 @@ cli.width = 80
 cli.option_width = 35
 
 let options = cli.parse({
-  steam: ['s', 'Path to Steam installation.', 'path', null],
-  user: ['u', 'User to switch to by account name or display name.', 'string', null],
+  steam: ['s', 'Path to Steam installation.', 'path', undefined],
+  user: ['u', 'User to switch to by account name or display name.', 'string', undefined],
   backup: ['b', 'Backup mode', 'boolean', false],
   restore: ['r', 'Restore mode', 'boolean', false]
 })
@@ -53,20 +53,20 @@ async function init () {
       process.exit(0)
     }
 
-    if (options.steam) {
+    if (options.steam === undefined) {
+      await steam.detectRoot(true)
+    } else {
       options.steam = path.join(options.steam.replace(/(\.\/)/, `${__dirname}/`))
 
       await steam.setRoot(path.join(options.steam))
-    } else {
-      await steam.detectRoot(true)
     }
 
     await steam.load(steam.paths.loginusers, steam.paths.registry)
 
-    if (options.user) {
-      await steam.setUser(options.user)
-    } else {
+    if (options.user === undefined) {
       await steam.detectUser(true)
+    } else {
+      await steam.setUser(options.user)
     }
 
     let paths = steam.paths.all.filter(p => p.indexOf('appinfo') === -1 && p.indexOf('skins') === -1 && p.indexOf('libraryfolders') === -1)
@@ -86,8 +86,6 @@ async function init () {
 
 function stripLoginUsers (lu) {
   Object.keys(lu).forEach((u) => {
-    delete lu[ u ].sharedconfig
-    delete lu[ u ].localconfig
     delete lu[ u ].id64
     delete lu[ u ].accountId
   })
@@ -131,11 +129,11 @@ async function restore () {
   try {
     data = JSON.parse(await afs.readFileAsync(file))
 
-    steam.config = Object.assign({}, data.config, steam.config)
-    steam.loginusers = Object.assign({}, data.loginusers, steam.loginusers)
-    steam.registry = Object.assign({}, data.registry, steam.registry)
-    steam.sharedconfig = Object.assign({}, steam.sharedconfig, data.sharedconfig)
-    steam.localconfig = Object.assign({}, steam.localconfig, data.localconfig)
+    steam.config = Object.assign({}, data.config, steam.config, steam.original.config)
+    steam.loginusers = Object.assign({}, data.loginusers, steam.loginusers, steam.original.loginusers)
+    steam.registry = Object.assign({}, data.registry, steam.registry, steam.original.registry)
+    steam.sharedconfig = Object.assign({}, data.sharedconfig, steam.sharedconfig, steam.original.sharedconfig)
+    steam.localconfig = Object.assign({}, data.localconfig, steam.localconfig, steam.original.localconfig)
   } catch (err) {
     if (err.code === 'ENOENT') {
       console.error('No backup to restore from.')
@@ -145,6 +143,7 @@ async function restore () {
   }
 
   await steam.save(steam.paths.config, steam.paths.loginusers, steam.paths.registry, steam.paths.sharedconfig, steam.paths.localconfig)
+  await steam.load(steam.paths.config, steam.paths.loginusers, steam.paths.registry, steam.paths.sharedconfig, steam.paths.localconfig)
 }
 
 async function run () {

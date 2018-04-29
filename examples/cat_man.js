@@ -84,8 +84,11 @@ async function handleAction (apps, options) {
       await backupCats(apps, options)
     } else {
       apps = await restoreCats(apps, options)
+      steam.sharedconfig.UserRoamingConfigStore.Software.Valve.Steam.Apps = apps
+      steam.sharedconfig = Object.assign({}, steam.sharedconfig, steam.original.sharedconfig)
 
       await steam.save(steam.paths.sharedconfig)
+      await steam.load(steam.paths.sharedconfig)
     }
   } catch (err) {
     throw err
@@ -100,7 +103,7 @@ async function run () {
       return console.info(`No mode set. Nothing to do!`)
     }
 
-    if (!options.steam) {
+    if (options.steam === undefined) {
       await steam.detectRoot(true)
       options.steam = steam.paths.rootPath
     } else {
@@ -111,7 +114,7 @@ async function run () {
 
     await steam.load(steam.paths.registry, steam.paths.loginusers)
 
-    if (!options.user) {
+    if (options.user === undefined) {
       await steam.detectUser(true)
     } else {
       await steam.setUser(options.user)
