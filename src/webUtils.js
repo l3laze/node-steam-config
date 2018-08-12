@@ -24,7 +24,7 @@ async function requestOwnedApps (id64, options) {
 
     const filePath = path.join(options.cache.folder, options.cache.file)
 
-    if (fs.existsSync(options.cache.folder) && fs.existsSync(filePath)) {
+    if (options.cache.enabled && !options.force && fs.existsSync(options.cache.folder) && fs.existsSync(filePath)) {
       data = '' + await al.readFileAsync(filePath)
       data = JSON.parse(data)
     } else {
@@ -37,12 +37,50 @@ async function requestOwnedApps (id64, options) {
       if (typeof data === 'object' && data.constructor.name !== 'Array') {
         data = [data]
       }
+
+      if (options.cache.enabled) {
+        if (!fs.existsSync(options.cache.folder)) {
+          await al.mkdirpAsync(options.cache.folder)
+        }
+
+        await al.writeFileAsync(filePath, JSON.stringify(data, null, 2))
+      }
     }
   } catch (err) {
-    throw new Error(err)
+    throw err
   }
 
   return data
+}
+
+async function extract (data, options) {
+  const tmp = {start: 0, end: 0}
+
+  if (options.inclusive === undefined) {
+    options.inclusive = false
+  }
+
+  tmp.start = data.indexOf(options.start)
+
+  if (tmp.start === -1) {
+    tmp.start = 0
+  }
+
+  if (options.inclusive === false) {
+    tmp.start += options.start.length
+  }
+
+  tmp.end = data.indexOf(options.end, tmp.start)
+
+  if (tmp.end === -1) {
+    tmp.end = 0
+  }
+
+  if (options.inclusive) {
+    tmp.end += options.end.length
+  }
+
+  return data.substring(tmp.start, tmp.end)
 }
 
 async function requestGenres (appid, options) {
@@ -50,8 +88,11 @@ async function requestGenres (appid, options) {
     throw new Error(`Invalid appid for requestGenres: ${typeof appid}. Should be a number as a 'string'.`)
   }
 
+  if (options.force === undefined) {
+    options.force = false
+  }
+
   let data
-  const genres = []
 
   try {
     if (options.cache.folder === undefined) {
@@ -63,14 +104,18 @@ async function requestGenres (appid, options) {
     }
 
     const filePath = path.join(options.cache.folder, options.cache.file)
+    const cacheExists = fs.existsSync(options.cache.folder) && fs.existsSync(filePath)
+    let fileData
 
-    if (options.cache.use && (fs.existsSync(options.cache.folder) && fs.existsSync(filePath))) {
-      data = '' + await al.readFileAsync(filePath)
-      data = JSON.parse(data)
-      data = data.filter((i) => i.appid === appid)[ 0 ]
+    if (cacheExists) {
+      fileData = JSON.parse('' + await al.readFileAsync(filePath))
     }
 
-    if (data === undefined) {
+    if (options.cache.enabled && !options.force && cacheExists) {
+      data = fileData.filter((i) => i.appid === appid)[ 0 ].genres
+    }
+
+    if (options.force || data === undefined) {
       data = await fetch(`https://store.steampowered.com/app/${appid}/`, {
         credentials: 'include',
         headers: {
@@ -79,34 +124,66 @@ async function requestGenres (appid, options) {
         timeout: options.timeout
       })
 
-      let index
-      let done = false
-
       data = '' + await data.text()
 
-      index = data.indexOf('<div class="details_block">')
+      data = await extract(data, {start: '<b>Genre:</b>', end: '<b>Developer:</b>'})
 
-      do {
-        index = data.indexOf('https://store.steampowered.com/genre/', index) // 37 characters
+      data = data.split('\n')
+        .filter((g) => g.trim() !== '')[ 0 ] // Remove lines full of whitespace
+        .split(', ') // Split up "list"
+        .map((g) => { // Parse genre link text
+          let start = g.indexOf('">')
 
-        if (index === -1) {
-          done = true
-          break
+          if (start !== -1) {
+            start += 2
+          }
+
+          return g.substring(start, g.indexOf('</a', start))
+        })
+
+      if (options.cache.enabled) {
+        if (!fs.existsSync(options.cache.folder)) {
+          await al.mkdirpAsync(options.cache.folder)
         }
 
-        index += 37
+        if (fileData !== undefined) {
+          let entry
 
-        genres.push(data.substring(index, data.indexOf('/', index)))
-      } while (!done)
+          for (entry in fileData) {
+            if (fileData[ entry ].appid === appid) {
+              fileData[ entry ] = {
+                appid: appid,
+                genres: data
+              }
+
+              break
+            }
+          }
+
+          if (fileData[ entry ].appid !== appid) {
+            fileData.push({
+              appid: appid,
+              genres: data
+            })
+          }
+        } else {
+          fileData = [{
+            appid: appid,
+            genres: data
+          }]
+        }
+
+        await al.writeFileAsync(filePath, JSON.stringify(fileData, null, 2))
+      }
     }
-  } catch (err) {
-    throw new Error(err)
-  }
 
-  return [{
-    appid,
-    genres
-  }]
+    return [{
+      appid,
+      genres: data
+    }]
+  } catch (err) {
+    throw err
+  }
 }
 
 async function requestTags (options) {
@@ -123,7 +200,7 @@ async function requestTags (options) {
 
     const filePath = path.join(options.cache.folder, options.cache.file)
 
-    if (fs.existsSync(options.cache.folder) && fs.existsSync(filePath)) {
+    if (options.cache.enabled && !options.force && fs.existsSync(options.cache.folder) && fs.existsSync(filePath)) {
       data = '' + await al.readFileAsync(filePath)
       data = JSON.parse(data)
     } else {
@@ -133,6 +210,14 @@ async function requestTags (options) {
 
       data = '' + await data.text()
       data = JSON.parse(data)
+
+      if (options.cache.enabled) {
+        if (!fs.existsSync(options.cache.folder)) {
+          await al.mkdirpAsync(options.cache.folder)
+        }
+
+        await al.writeFileAsync(filePath, JSON.stringify(data, null, 2))
+      }
     }
   } catch (err) {
     throw new Error(err)

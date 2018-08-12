@@ -2,88 +2,85 @@
 
 const path = require('path')
 const platform = require('os').platform()
-const arch = /64/.test(process.env.PROCESSOR_ARCHITECTURE) ? '64' : '86'
+const platformPaths = require('./platformPaths.js')
 
-const platformPaths = {
-  mac: {
-    root: '~/Library/Application Support/Steam',
-    appinfo: '/appcache/appinfo.vdf',
-    config: '/config/config.vdf',
-    libraryfolders: '/steamapps/libraryfolders.vdf',
-    localconfig: '/userdata/accountID/config/localconfig.vdf',
-    loginusers: '/config/loginusers.vdf',
-    registry: '/registry.vdf',
-    sharedconfig: '/userdata/accountID/7/remote/sharedconfig.vdf',
-    shortcuts: '/userdata/accountID/config/shortcuts.vdf',
-    steamapps: '/steamapps',
-    skins: '/Steam.AppBundle/Steam/Contents/MacOS/skins'
-  },
-  linux: {
-    root: '~/.steam',
-    appinfo: '/steam/appcache/appinfo.vdf',
-    config: '/steam/config/config.vdf',
-    libraryfolders: '/steam/steamapps/libraryfolders.vdf',
-    localconfig: '/steam/userdata/accountID/config/localconfig.vdf',
-    loginusers: '/steam/config/loginusers.vdf',
-    registry: '/registry.vdf',
-    sharedconfig: '/steam/userdata/accountID/7/remote/sharedconfig.vdf',
-    shortcuts: '/steam/userdata/accountID/config/shortcuts.vdf',
-    steamapps: '/steam/steamapps',
-    skins: '/skins'
-  },
-  win32: {
-    root: (arch === '64' ? 'C:\\Program Files (x86)\\Steam' : 'C:\\Program Files\\Steam'),
-    appinfo: '/appcache/appinfo.vdf',
-    config: '/config/config.vdf',
-    libraryfolders: '/steamapps/libraryfolders.vdf',
-    localconfig: '/userdata/accountID/config/localconfig.vdf',
-    loginusers: '/config/loginusers.vdf',
-    registry: 'winreg',
-    sharedconfig: '/userdata/accountID/7/remote/sharedconfig.vdf',
-    shortcuts: '/userdata/accountID/config/shortcuts.vdf',
-    steamapps: '/steamapps',
-    skins: '/skins'
-  }
-}
+function SteamFiles () {
+  let rootPath = platformPaths[ platform ].root
+  let id64 = 0
+  let accountID = 0
 
-const sfProps = {
-  root: undefined,
-  id64: undefined,
-  accountId: undefined,
-
-  appinfo: '/appcache/appinfo.vdf',
-  config: '/config/config.vdf',
-  libraryfolders: '/steamapps/libraryfolders.vdf',
-  localconfig: '/userdata/accountID/config/localconfig.vdf',
-  loginusers: '/config/loginusers.vdf',
-  registry: '/registry.vdf',
-  sharedconfig: '/userdata/accountID/7/remote/sharedconfig.vdf',
-  shortcuts: '/userdata/accountID/config/shortcuts.vdf',
-  steamapps: '/steamapps',
-  skins: '/Steam.AppBundle/Steam/Contents/MacOS/skins'
-}
-
-function SteamFiles (props) {
-  Object.keys(props).forEach(function (p) {
-    if (p !== 'root' && p !== 'id64' && p !== 'accountId') {
-      Object.defineProperty(this, p, {
-        get: function () {
-          return path.join(props.root, platformPaths[ platform ][ p ].replace('accountId', props.accountId))
-        },
-        set: function (val) {
-        }
-      })
-    } else {
-      Object.defineProperty(this, p, {
-        get: function () {
-          return props[ p ]
-        },
-        set: function (val) {
-          props[ p ] = val
-        }
-      })
+  const obj = {
+    get root () {
+      return rootPath
+    },
+    set root (to) {
+      rootPath = to
+    },
+    get id64 () {
+      return id64
+    },
+    set id64 (to) {
+      id64 = to
+    },
+    get accountID () {
+      return accountID
+    },
+    set accountID (to) {
+      accountID = to
+    },
+    get appinfo () {
+      return path.join(rootPath, platformPaths[ platform ].appinfo)
+    },
+    get config () {
+      return path.join(rootPath, platformPaths[ platform ].config)
+    },
+    get libraryfolders () {
+      return path.join(rootPath, platformPaths[ platform ].libraryfolders)
+    },
+    get localconfig () {
+      return path.join(rootPath, platformPaths[ platform ].localconfig.replace('accountID', accountID))
+    },
+    get loginusers () {
+      return path.join(rootPath, platformPaths[ platform ].loginusers)
+    },
+    get registry () {
+      return path.join(rootPath, platformPaths[ platform ].registry)
+    },
+    get sharedconfig () {
+      return path.join(rootPath, platformPaths[ platform ].sharedconfig.replace('accountID', accountID))
+    },
+    get shortcuts () {
+      return path.join(rootPath, platformPaths[ platform ].shortcuts.replace('accountID', accountID))
+    },
+    get steamapps () {
+      return path.join(rootPath, platformPaths[ platform ].steamapps)
+    },
+    get skins () {
+      return path.join(rootPath, platformPaths[ platform ].skins)
+    },
+    set appinfo (to) {
+    },
+    set config (to) {
+    },
+    set libraryfolders (to) {
+    },
+    set localconfig (to) {
+    },
+    set loginusers (to) {
+    },
+    set registry (to) {
+    },
+    set sharedconfig (to) {
+    },
+    set shorcuts (to) {
+    },
+    set steamapps (to) {
+    },
+    set skins (to) {
     }
-  })
+  }
+
+  return obj
 }
 
-module.exports = new SteamFiles(sfProps)
+module.exports = new SteamFiles()

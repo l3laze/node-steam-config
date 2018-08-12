@@ -229,16 +229,6 @@ SteamConfig.prototype.loadApps = async function loadApps (fromPath) {
   return apps
 }
 
-SteamConfig.prototype.saveApps = async function saveApps (data) {
-  try {
-    for (let app of data) {
-      await saveTextVDF(app.filePath, app.data)
-    }
-  } catch (err) {
-    throw new Error(err)
-  }
-}
-
 SteamConfig.prototype.save = async function save (names) {
   try {
     let filePath
@@ -260,6 +250,16 @@ SteamConfig.prototype.save = async function save (names) {
       }
 
       return result
+    }
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+SteamConfig.prototype.saveApps = async function saveApps (data) {
+  try {
+    for (let app of data) {
+      await saveTextVDF(app.filePath, app.data)
     }
   } catch (err) {
     throw new Error(err)
