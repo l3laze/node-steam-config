@@ -316,6 +316,10 @@ SteamConfig.prototype.getPath = function getPath (name, root, accountID) {
   }
 }
 
+SteamConfig.prototype.setRoot = function setRoot (toPath) {
+  this.files.rootPath = toPath
+}
+
 SteamConfig.prototype.findUser = async function findUser (identifier) {
   const users = this.loginusers.users
   const user = Object.keys(users).filter((u) => {
