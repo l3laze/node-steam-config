@@ -8,7 +8,6 @@ const steam = require('./../src/index.js')
 
 const expect = chai.expect
 
-const home = require('os').homedir()
 const platform = require('os').platform()
 
 const id64 = '76561198067577712'
