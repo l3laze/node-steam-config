@@ -26,12 +26,12 @@ async function run () {
     await steam.setRoot(options.steam)
   }
 
-  await steam.load(steam.paths.registry, steam.paths.loginusers)
+  await steam.load(steam.files.registry, steam.files.loginusers)
 
   let userKeys = Object.keys(steam.loginusers.users)
 
   if (options.user === undefined && userKeys.length > 2) {
-    throw new Error(`There are ${userKeys.length} users associated with the Steam installation at ${steam.paths.root}. Cannot auto-switch between more than 2.`)
+    throw new Error(`There are ${userKeys.length} users associated with the Steam installation at ${steam.files.root}. Cannot auto-switch between more than 2.`)
   }
 
   let found
@@ -53,7 +53,7 @@ async function run () {
         }
       })
 
-      await steam.save(steam.paths.registry, steam.paths.loginusers)
+      await steam.save(steam.files.registry, steam.files.loginusers)
       console.info(`Switched to ${steam.loginusers.users[ found.id64 ].PersonaName}.`)
       process.exit(0)
     }
