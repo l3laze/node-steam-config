@@ -158,7 +158,7 @@ async function reqGenresHelper (appid) {
     let index
     let done = false
 
-    data = await fetch(`http://store.steampowered.com/app/${appid}/`, {
+    data = await fetch(`https://store.steampowered.com/app/${appid}/`, {
       credentials: 'include',
       headers: {
         cookie: 'birthtime=189324001' // 1/1/1976 @ 12:00:01 AM
