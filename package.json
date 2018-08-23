@@ -43,7 +43,7 @@
     "textcov": "nyc report --reporter=text-lcov > coverage.lcov",
     "coverage": "yarn htmlcov && yarn textcov",
     "codecov": "codecov",
-    "docs": "node ./node_modules/doccomment/doccomment.js -n SteamConfig -p '(index|steamPaths|steamUtils).js'",
+    "docs": "node ./node_modules/doccomment/doccomment.js -n 'node-steam-config' -p '(index|steamPaths|steamUtils).js' -f md",
     "make-examples-dummy": "node ./examples/example_dummy.js",
     "test-switch": "node ./examples/switch_user.js -s ./Dummy",
     "test-log": "node ./examples/log_info.js -s ./Dummy",

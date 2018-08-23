@@ -1,4 +1,4 @@
-# **`SteamConfig`** API Documentation<br />Version `0.0.3-rc1`
+# **`node-steam-config`** API Documentation<br />Version `0.0.3-rc1`
 
 ## ------------
 ### **Table of Contents**
