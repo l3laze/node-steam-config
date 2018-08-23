@@ -4,7 +4,7 @@
 const path = require('path')
 const chai = require('chai')
 const expect = chai.expect
-const platform = require('os').platform()
+const platform = require('./../src/getPlatform.js').getPlatform()
 const steamPaths = require('./../src/steamPaths.js')
 const platformPaths = require('./../src/platformPaths.js')
 
@@ -35,6 +35,7 @@ describe('Module SteamPaths', function spDescriptor () {
 
   describe('paths', function spPathsDescriptor () {
     it('should return platform-specific paths', function spIsPlatformFriendly () {
+      expect(steamPaths).to.be.a('object')
       steamPaths.id64 = id64
       steamPaths.accountID = accountID
 

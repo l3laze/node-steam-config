@@ -16,19 +16,21 @@ let options = cli.parse({
   user: ['u', 'User to switch to by account name or display name.', 'string', undefined]
 })
 
+console.info(options.steam, options.user)
+
 async function run () {
   if (options.steam === undefined) {
     console.info('Trying to find default path to Steam...')
     await steam.detectRoot(true)
   } else {
-    options.steam = path.join(options.steam.replace(/(\.\/)/, `${__dirname}/`))
+    options.steam = path.resolve(options.steam)
 
     await steam.setRoot(options.steam)
   }
 
-  await steam.load(steam.files.registry, steam.files.loginusers)
+  await steam.load('registry', 'loginusers')
 
-  let userKeys = Object.keys(steam.loginusers.users)
+  let userKeys = Object.keys(steam.loginusers)
 
   if (options.user === undefined && userKeys.length > 2) {
     throw new Error(`There are ${userKeys.length} users associated with the Steam installation at ${steam.files.root}. Cannot auto-switch between more than 2.`)
@@ -45,16 +47,16 @@ async function run () {
 
     if (found !== undefined) {
       steam.registry.Registry.HKCU.Software.Valve.Steam.AutoLoginUser = steam.loginusers.users[ found.id64 ].AccountName
-      Object.keys(steam.loginusers.users).forEach((k) => {
+      Object.keys(steam.loginusers).forEach((k) => {
         if (k !== found.id64) {
-          steam.loginusers.users[ k ].mostrecent = '0'
+          steam.loginusers[ k ].mostrecent = '0'
         } else {
-          steam.loginusers.users[ k ].mostrecent = '1'
+          steam.loginusers[ k ].mostrecent = '1'
         }
       })
 
-      await steam.save(steam.files.registry, steam.files.loginusers)
-      console.info(`Switched to ${steam.loginusers.users[ found.id64 ].PersonaName}.`)
+      await steam.save('registry', 'loginusers')
+      console.info(`Switched to ${steam.loginusers[ found.id64 ].PersonaName}.`)
       process.exit(0)
     }
   }

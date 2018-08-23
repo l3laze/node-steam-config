@@ -1,7 +1,7 @@
 'use strict'
 
 const path = require('path')
-const platform = require('os').platform()
+const platform = require('./getPlatform.js').getPlatform()
 const platformPaths = require('./platformPaths.js')
 
 function SteamFiles () {

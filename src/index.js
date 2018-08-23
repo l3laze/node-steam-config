@@ -167,9 +167,9 @@ function SteamConfig () {
     shortcuts: {},
     apps: []
   }
-
-  this.files = require('./steamPaths.js')
 }
+
+SteamConfig.prototype.files = require('./steamPaths.js')
 
 SteamConfig.prototype.load = async function load (names) {
   try {
@@ -193,7 +193,7 @@ SteamConfig.prototype.load = async function load (names) {
         }
       }
 
-      return afterLoad(name, result)
+      this[ name ] = afterLoad(name, result)
     }
   } catch (err) {
     throw new Error(err)
@@ -340,7 +340,8 @@ SteamConfig.prototype.findUser = async function findUser (identifier) {
 }
 
 SteamConfig.prototype.detectUser = async function detectUser (autoSet = false) {
-  const users = Object.keys(this.loginusers.users)
+  const users = Object.keys(this.loginusers)
+
   let user = users.filter((u) => {
     return users[ u ].mostrecent === 1
   })[ 0 ]
