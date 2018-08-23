@@ -170,14 +170,14 @@ async function reqGenresHelper (appid) {
     index = data.indexOf('<div class="details_block">')
 
     do {
-      index = data.indexOf('http://store.steampowered.com/genre/', index) // 36 characters
+      index = data.indexOf('https://store.steampowered.com/genre/', index) // 37 characters
 
       if (index === -1) {
         done = true
         break
       }
 
-      index += 36
+      index += 37
 
       genres.push(data.substring(index, data.indexOf('/', index)))
     } while (!done)
