@@ -18,7 +18,8 @@
 'use strict'
 
 const path = require('path')
-const platform = require('os').platform()
+const { getPlatform } = require('./getPlatform.js')
+const platform = getPlatform()
 
 function SteamPaths () {
   let rootPath

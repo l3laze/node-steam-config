@@ -5,10 +5,11 @@ const path = require('path')
 const expect = require('chai').expect
 const makeDummy = require('steam-dummy')
 const steamPaths = require('./../src/steamPaths.js')
+const { getPlatform } = require('./../src/getPlatform.js')
 
 const id64 = '76561198067577712'
 const accountID = '107311984'
-const platform = require('os').platform()
+const platform = getPlatform()
 
 let pathTo
 
@@ -35,10 +36,6 @@ steamPaths.root = pathTo
 describe('Module paths @notreq', function pathsDescriptor () {
   this.slow(0)
 
-  before(async function initDummy () {
-    await makeDummy(pathTo)
-  })
-
   it('should be initialized by require\'ing it', function initsOnReq () {
     expect(steamPaths).to.have.property('config')
   })
@@ -61,11 +58,25 @@ describe('Module paths @notreq', function pathsDescriptor () {
     expect(steamPaths).to.have.property('steamapps')
   })
 
+  it('should create a dummy for testing', async function () {
+    console.info(pathTo)
+
+    await makeDummy(pathTo, {
+      force: true
+    })
+  })
+
+  it('should have created a dummy for testing', async function () {
+    expect(async function () {
+      return (await require('fs').existsSync(steamPaths.registry) === true)
+    }).to.not.throw().and.to.equal(true)
+  })
+
   it('should return proper values/paths', function properPaths () {
     expect(steamPaths.root).to.equal(pathTo)
     expect(steamPaths.id64).to.equal(id64)
     expect(steamPaths.appinfo).to.equal(
-      platform === 'linux'
+      (platform === 'linux' || platform === 'android')
         ? path.join(pathTo, 'steam', 'appcache', 'appinfo.vdf')
         : path.join(pathTo, 'appcache', 'appinfo.vdf')
     )

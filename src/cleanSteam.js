@@ -125,12 +125,14 @@ module.exports = {
             Apps: '*',
             SteamDefaultDialog: '',
             DesktopShortcutCheck: '',
-            StartMenuShortcutCheck: ''
+            StartMenuShortcutCheck: '',
+            FriendsUI: '*'
           }
         }
       },
       Web: '*',
       controller_config: '*'
     }
-  }
+  },
+  shortcuts: '*'
 }

@@ -102,18 +102,19 @@ async function backup () {
     let data = {
       arch: os.arch(),
       platform: os.platform(),
-
-      config: cleanObject(steam.config, cleaned.config),
-      localconfig: cleanObject(steam.localconfig, cleaned.localconfig),
-      registry: cleanObject(steam.registry, cleaned.registry),
-      sharedconfig: cleanObject(steam.sharedconfig, cleaned.sharedconfig),
-      loginusers: Object.assign({}, stripLoginUsers(steam.loginusers.users)),
       user: Object.assign({}, {
         AccountName: steam.loginusers.users[ steam.paths.id64 ].AccountName,
         PersonaName: steam.loginusers.users[ steam.paths.id64 ].PersonaName,
         accountId: steam.paths.accountId,
         id64: steam.paths.id64
-      })
+      }),
+
+      config: cleanObject(steam.config, cleaned.config),
+      localconfig: cleanObject(steam.localconfig, cleaned.localconfig),
+      registry: cleanObject(steam.registry, cleaned.registry),
+      sharedconfig: cleanObject(steam.sharedconfig, cleaned.sharedconfig),
+      shortcuts: steam.loginusers.users[ steam.paths.id64 ].shortcuts,
+      loginusers: Object.assign({}, stripLoginUsers(steam.loginusers.users))
     }
 
     await afs.writeFileAsync(path.join(options.destination, `backup-${steam.paths.id64}.json`), JSON.stringify(data, null, 2))

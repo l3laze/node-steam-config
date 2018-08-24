@@ -269,7 +269,7 @@ SteamConfig.prototype.detectRoot = async function detectRoot (auto = false) {
 
   if (platform === 'darwin') {
     detected = path.join(require('os').homedir(), 'Library', 'Application Support', 'Steam')
-  } else if (platform === 'linux') {
+  } else if (platform === 'linux' || platform === 'android') {
     detected = path.join(require('os').homedir(), '.steam')
   } else if (platform === 'win32') {
     if (!/64/.test(process.env.PROCESSOR_ARCHITECTURE)) {

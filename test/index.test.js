@@ -107,7 +107,7 @@ describe('Module SteamConfig @notreq', function moduleDescriptor () {
     it('should set the root to a valid path', async function setRootWorks () {
       const detectedRoot = await steam.detectRoot()
 
-      await steam.setRoot(detectedRoot)
+      expect(detectedRoot).to.equal(await steam.detectRoot())
 
       expect(steam.paths.root).to.equal(detectedRoot)
 
@@ -185,6 +185,7 @@ describe('Module SteamConfig @notreq', function moduleDescriptor () {
     this.timeout(4000)
 
     it('should load single entries as requested', async function loadProperly () {
+      this.timeout(10000)
       await steam.load(steam.paths.appinfo)
       expect(steam.appinfo).to.be.a('array')
 
@@ -217,14 +218,13 @@ describe('Module SteamConfig @notreq', function moduleDescriptor () {
     })
 
     it('should load steamapps as requested', async function loadMoreApps () {
+      this.timeout(10000)
       let externalLib
 
-      for (let k of Object.keys(steam.libraryfolders.LibraryFolders)) {
-        if (k !== 'ContentStatsID' && k !== 'TimeNextStatsReport') {
-          steam.libraryfolders.LibraryFolders[ k ] = path.join(pathTo, 'External Steam Library Folder')
-          externalLib = steam.libraryfolders.LibraryFolders[ k ]
-        }
-      }
+      steam.libraryfolders.LibraryFolders[ 1 ] = path.join(pathTo, 'External Steam Library Folder')
+      externalLib = steam.libraryfolders.LibraryFolders[ 1 ]
+
+      console.info(externalLib)
 
       await steam.load(steam.paths.steamapps(externalLib))
       expect(steam.apps).to.be.a('array').and.have.property('length').and.equal(4)
@@ -238,6 +238,7 @@ describe('Module SteamConfig @notreq', function moduleDescriptor () {
     })
 
     it('should load multiple/all entries as requested', async function loadProperly () {
+      this.timeout(10000)
       try {
         const everything = steam.paths.all
         steam.apps.length = 0
@@ -262,6 +263,7 @@ describe('Module SteamConfig @notreq', function moduleDescriptor () {
 
   describe('#save', function saveDescriptor () {
     it('should save entries as requested', async function saveProperly () {
+      this.timeout(10000)
       expect(async function saveWorks () {
         await steam.save(steam.paths.config)
         await steam.save(steam.paths.libraryfolders)
@@ -272,6 +274,7 @@ describe('Module SteamConfig @notreq', function moduleDescriptor () {
     })
 
     it('should save multiple entries as requested', async function saveProperly () {
+      this.timeout(10000)
       expect(async function saveWorks () {
         await steam.save(steam.paths.all)
       }).to.not.throw()
