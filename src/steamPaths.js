@@ -18,8 +18,7 @@
 'use strict'
 
 const path = require('path')
-const { getPlatform } = require('./getPlatform.js')
-const platform = getPlatform()
+const platform = require('os').platform
 
 function SteamPaths () {
   let rootPath
@@ -62,7 +61,7 @@ function SteamPaths () {
     set all (to) {},
 
     get appinfo () {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         return path.join(rootPath, 'appcache', 'appinfo.vdf')
       } else {
         return path.join(rootPath, 'steam', 'appcache', 'appinfo.vdf')
@@ -71,7 +70,7 @@ function SteamPaths () {
     set appinfo (to) {},
 
     get config () {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         return path.join(rootPath, 'config', 'config.vdf')
       } else {
         return path.join(rootPath, 'steam', 'config', 'config.vdf')
@@ -80,7 +79,7 @@ function SteamPaths () {
     set config (to) {},
 
     get libraryfolders () {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         return path.join(rootPath, 'steamapps', 'libraryfolders.vdf')
       } else {
         return path.join(rootPath, 'steam', 'steamapps', 'libraryfolders.vdf')
@@ -89,7 +88,7 @@ function SteamPaths () {
     set libraryfolders (to) {},
 
     get localconfig () {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         return path.join(rootPath, 'userdata', accountId, 'config', 'localconfig.vdf')
       } else {
         return path.join(rootPath, 'steam', 'userdata', accountId, 'config', 'localconfig.vdf')
@@ -98,7 +97,7 @@ function SteamPaths () {
     set localconfig (to) {},
 
     get loginusers () {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         return path.join(rootPath, 'config', 'loginusers.vdf')
       } else {
         return path.join(rootPath, 'steam', 'config', 'loginusers.vdf')
@@ -116,7 +115,7 @@ function SteamPaths () {
     set registry (to) {},
 
     get sharedconfig () {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         return path.join(rootPath, 'userdata', accountId, '7', 'remote', 'sharedconfig.vdf')
       } else {
         return path.join(rootPath, 'steam', 'userdata', accountId, '7', 'remote', 'sharedconfig.vdf')
@@ -125,7 +124,7 @@ function SteamPaths () {
     set sharedconfig (to) {},
 
     get shortcuts () {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         return path.join(rootPath, 'userdata', accountId, 'config', 'shortcuts.vdf')
       } else {
         return path.join(rootPath, 'steam', 'userdata', accountId, 'config', 'shortcuts.vdf')
@@ -153,7 +152,7 @@ function SteamPaths () {
    */
   obj.app = function getApp (id, library = undefined) {
     if (typeof library === 'undefined') {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         library = path.join(rootPath, 'steamapps')
       } else {
         library = path.join(rootPath, 'steam', 'steamapps')
@@ -172,7 +171,7 @@ function SteamPaths () {
   */
   obj.steamapps = function getSteamApps (library = undefined) {
     if (typeof library === 'undefined') {
-      if (platform !== 'linux') {
+      if (platform !== 'linux' && platform !== 'android') {
         library = rootPath
       } else {
         library = path.join(rootPath, 'steam')

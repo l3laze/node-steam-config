@@ -5,18 +5,17 @@ const path = require('path')
 const expect = require('chai').expect
 const makeDummy = require('steam-dummy')
 const steamPaths = require('./../src/steamPaths.js')
-const { getPlatform } = require('./../src/getPlatform.js')
 
 const id64 = '76561198067577712'
 const accountID = '107311984'
-const platform = getPlatform()
+const platform = require('os').platform
 
 let pathTo
 
 if (typeof process.env.CI !== 'undefined' || process.env.SCTRP === true) { // Test Real Paths
   if (platform === 'darwin') {
     pathTo = path.join(require('os').homedir(), 'Library', 'Application Support', 'Steam')
-  } else if (platform === 'linux') {
+  } else if (platform === 'linux' || platform === 'android') {
     pathTo = path.join(require('os').homedir(), '.steam')
   } else if (platform === 'win32') {
     if (!/64/.test(process.env.PROCESSOR_ARCHITECTURE)) {
@@ -81,22 +80,22 @@ describe('Module paths @notreq', function pathsDescriptor () {
         : path.join(pathTo, 'appcache', 'appinfo.vdf')
     )
     expect(steamPaths.config).to.equal(
-      platform === 'linux'
+      (platform === 'linux' || platform === 'android')
         ? path.join(pathTo, 'steam', 'config', 'config.vdf')
         : path.join(pathTo, 'config', 'config.vdf')
     )
     expect(steamPaths.libraryfolders).to.equal(
-      platform === 'linux'
+      (platform === 'linux' || platform === 'android')
         ? path.join(pathTo, 'steam', 'steamapps', 'libraryfolders.vdf')
         : path.join(pathTo, 'steamapps', 'libraryfolders.vdf')
     )
     expect(steamPaths.localconfig).to.equal(
-      platform === 'linux'
+      (platform === 'linux' || platform === 'android')
         ? path.join(pathTo, 'steam', 'userdata', accountID, 'config', 'localconfig.vdf')
         : path.join(pathTo, 'userdata', accountID, 'config', 'localconfig.vdf')
     )
     expect(steamPaths.loginusers).to.equal(
-      platform === 'linux'
+      (platform === 'linux' || platform === 'android')
         ? path.join(pathTo, 'steam', 'config', 'loginusers.vdf')
         : path.join(pathTo, 'config', 'loginusers.vdf')
     )
@@ -106,12 +105,12 @@ describe('Module paths @notreq', function pathsDescriptor () {
         : path.join('registry.winreg')
     )
     expect(steamPaths.sharedconfig).to.equal(
-      platform === 'linux'
+      (platform === 'linux' || platform === 'android')
         ? path.join(pathTo, 'steam', 'userdata', accountID, '7', 'remote', 'sharedconfig.vdf')
         : path.join(pathTo, 'userdata', accountID, '7', 'remote', 'sharedconfig.vdf')
     )
     expect(steamPaths.shortcuts).to.equal(
-      platform === 'linux'
+      (platform === 'linux' || platform === 'android')
         ? path.join(pathTo, 'steam', 'userdata', accountID, 'config', 'shortcuts.vdf')
         : path.join(pathTo, 'userdata', accountID, 'config', 'shortcuts.vdf')
     )
